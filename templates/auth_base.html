@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block body %}
+<div class="auth-page">
+
+  <!-- Left panel: branding -->
+  <div class="auth-panel-left">
+    <a href="/" class="auth-logo">
+      <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo Geomix" class="logo-icon">
+      <span class="logo-text">Geomix</span>
+    </a>
+    <div class="auth-figures" aria-hidden="true">
+      <svg viewBox="0 0 100 100" width="90"><polygon points="50,5 95,85 5,85" fill="rgba(255,255,255,.18)" stroke="rgba(255,255,255,.35)" stroke-width="2" stroke-linejoin="round"/></svg>
+      <svg viewBox="0 0 100 100" width="80"><circle cx="50" cy="50" r="43" fill="rgba(255,255,255,.12)" stroke="rgba(255,255,255,.3)" stroke-width="2"/></svg>
+      <svg viewBox="0 0 100 100" width="85"><rect x="8" y="8" width="84" height="84" fill="rgba(255,255,255,.1)" stroke="rgba(255,255,255,.25)" stroke-width="2" rx="6"/></svg>
+      <svg viewBox="0 0 100 100" width="75"><polygon points="50,5 95,50 50,95 5,50" fill="rgba(255,255,255,.15)" stroke="rgba(255,255,255,.3)" stroke-width="2" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="auth-left-text">
+      <h2>Geomix,<br/>Gometria Plana de forma divertida!</h2>
+    </div>
+  </div>
+
+  <!-- Right panel: form -->
+  <div class="auth-panel-right">
+    {% block auth_content %}{% endblock %}
+  </div>
+
+</div>
+{% endblock %}

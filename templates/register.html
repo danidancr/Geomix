@@ -1,0 +1,68 @@
+{% extends "auth_base.html" %}
+{% block title %}Cadastro — Geomix{% endblock %}
+{% block auth_content %}
+
+<div class="auth-form-wrap">
+  <div class="auth-form-header">
+    <h1>Criar Conta</h1>
+    <p>Comece sua jornada no Geomix</p>
+  </div>
+
+  {% if error %}
+  <div class="auth-error">
+    <span>⚠️Erro!!!⚠️</span> {{ error }}
+  </div>
+  {% endif %}
+
+  <form method="POST" class="auth-form" novalidate>
+    <div class="form-group">
+      <label for="name">Nome completo</label>
+      <div class="input-wrap">
+        <input type="text" id="name" name="name" placeholder="Seu nome"
+               value="{{ request.form.get('name', '') }}" required autocomplete="name"/>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="email">E-mail</label>
+      <div class="input-wrap">
+        <input type="email" id="email" name="email" placeholder="seu@email.com"
+               value="{{ request.form.get('email', '') }}" required autocomplete="email"/>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="password">Senha</label>
+      <div class="input-wrap">
+        <input type="password" id="password" name="password"
+               placeholder="Mínimo 6 caracteres" required autocomplete="new-password"/>
+        <button type="button" class="toggle-pw" onclick="togglePw('password')"style="font-size: 25px;">👁</button>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="confirm">Confirmar senha</label>
+      <div class="input-wrap">
+        <input type="password" id="confirm" name="confirm"
+               placeholder="Repita a senha" required autocomplete="new-password"/>
+        <button type="button" class="toggle-pw" onclick="togglePw('confirm')"style="font-size: 25px;">👁</button>
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary btn-3d btn-full">
+      Criar conta
+    </button>
+  </form>
+
+  <div class="auth-alt">
+    Já tem uma conta? <a href="/login">Entrar</a>
+  </div>
+</div>
+
+<script>
+function togglePw(id) {
+  const el = document.getElementById(id);
+  el.type = el.type === 'password' ? 'text' : 'password';
+}
+</script>
+{% endblock %}

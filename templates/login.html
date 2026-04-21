@@ -1,0 +1,54 @@
+{% extends "auth_base.html" %}
+{% block title %}Entrar — Geomix{% endblock %}
+{% block auth_content %}
+
+<div class="auth-form-wrap">
+  <div class="auth-form-header">
+    <h1>Bem-vindo de volta!</h1>
+    <p>Continue de onde parou</p>
+  </div>
+
+  {% if error %}
+  <div class="auth-error">
+    <span>⚠️</span> {{ error }}
+  </div>
+  {% endif %}
+
+  <form method="POST" class="auth-form" novalidate>
+    <div class="form-group">
+      <label for="email">E-mail</label>
+      <div class="input-wrap">
+        <input type="email" id="email" name="email" placeholder="seu@email.com"
+               value="{{ request.form.get('email', '') }}" required autocomplete="email"/>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="password">
+        Senha
+        <a href="/forgot-password" class="label-link">Esqueceu?</a>
+      </label>
+      <div class="input-wrap">
+        <input type="password" id="password" name="password"
+               placeholder="Sua senha" required autocomplete="current-password"/>
+        <button type="button" class="toggle-pw" onclick="togglePw('password')"style="font-size: 25px;">👁</button>
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary btn-3d btn-full">
+      Entrar
+    </button>
+  </form>
+
+  <div class="auth-alt">
+    Não tem conta? <a href="/register">Cadastrar-se</a>
+  </div>
+</div>
+
+<script>
+function togglePw(id) {
+  const el = document.getElementById(id);
+  el.type = el.type === 'password' ? 'text' : 'password';
+}
+</script>
+{% endblock %}

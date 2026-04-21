@@ -1,0 +1,220 @@
+{% extends "base.html" %}
+{% block title %}Meu Perfil — Geomix{% endblock %}
+{% block body %}
+
+<div class="app-layout">
+  {% set active_page = 'profile' %}
+  {% include '_sidebar.html' %}
+
+  <main class="main-content">
+    <div class="profile-page">
+
+      <div class="profile-header-card">
+        <div class="profile-avatar-lg" id="av-display">{{ user.name[0].upper() }}</div>
+        <div class="profile-header-info">
+          <h1 id="ph-name">{{ user.name }}</h1>
+          <p id="ph-email">{{ user.email }}</p>
+          <div class="profile-header-chips">
+            <div class="chip chip-xp">  
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="white" style="vertical-align: middle; margin-right:4px;">
+                <path d="M11 21h-1l1-7H7l6-11h1l-1 7h4z"/>
+              </svg>
+              {{ user.xp }} XP
+            </div>
+            <div class="chip chip-streak">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="white" style="vertical-align: middle; margin-right:4px;">
+                <path d="M13 3s-2 2-2 5c0 2 2 3 2 5s-2 3-2 5a5 5 0 0 0 10 0c0-5-6-7-8-15z"/>
+              </svg>
+              {{ user.streak }}
+            </div>
+            <div class="chip chip-since">Desde {{ user.created_at.strftime('%b/%Y') }}</div>
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="openEditModal()">Editar dados</button>
+      </div>
+
+      <div class="stats-overview">
+        <div class="stat-card">
+          <div class="sc-val">{{ stats.total_answered }}</div>
+          <div class="sc-label">Questões Respondidas</div>
+        </div>
+        <div class="stat-card">
+          <div class="sc-val">{{ stats.total_correct }}</div>
+          <div class="sc-label">Respostas Corretas</div>
+        </div>
+        <div class="stat-card">
+          <div class="sc-val">{{ stats.accuracy }}%</div>
+          <div class="sc-label">Precisão Geral</div>
+        </div>
+        <div class="stat-card">
+          <div class="sc-val">{{ user.streak }}</div>
+          <div class="sc-label">Dias Seguidos</div>
+        </div>
+      </div>
+
+      <div class="profile-section-1">
+        <h2 class="section-h-1">Atividades</h2>
+        <div class="week-grid">
+          {% for day in stats.week_data %}
+          <div class="week-day{% if day.active %} active{% endif %}{% if day.is_today %} today{% endif %}">
+            <div class="week-dot{% if day.active %} filled{% endif %}{% if day.is_today %} today-ring{% endif %}">
+            </div>
+            <div class="week-label">
+              {{ day.label }}
+              {% if day.is_today %}<span class="today-tag"></span>{% endif %}
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="profile-section-2">
+        <h2 class="section-h-2">Progresso por Unidade</h2>
+        <div class="unit-progress-list">
+          {% for u in stats.units %}
+          <div class="uprog-item">
+             <div class="uprog-body">
+              <div class="uprog-header">
+                <span class="uprog-title">Unidade {{ u.id }} — {{ u.title }}</span>
+                <span class="uprog-count">{{ u.acts_done }}/5 atividades</span>
+              </div>
+              <div class="uprog-bar-track">
+                <div class="uprog-bar-fill" style="width:{{ u.pct }}%; background:{{ u.color }}"></div>
+              </div>
+              <div class="uprog-detail">
+                {% if u.answered > 0 %}
+                  {{ u.answered }} questões respondidas —
+                  {{ u.correct }} corretas
+                  ({{ (u.correct / u.answered * 100) | round | int }}%)
+                {% else %}
+                  Ainda não iniciada
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- ── EDIT MODAL ── -->
+<div class="modal-overlay" id="edit-modal" style="display:none">
+  <div class="modal-box modal-large">
+    <h3>Editar informações</h3>
+    <div id="edit-error" class="auth-error" style="display:none"></div>
+    <div id="edit-success" class="auth-success" style="display:none">Dados atualizados com sucesso!</div>
+
+    <div class="edit-tabs">
+      <button class="tab-btn active" onclick="switchTab('info')">Dados pessoais</button>
+      <button class="tab-btn" onclick="switchTab('pw')">Alterar senha</button>
+    </div>
+
+    <!-- Tab: info -->
+    <div id="tab-info" class="tab-content">
+      <div class="form-group">
+        <label>Nome completo</label>
+        <div class="input-wrap">
+          <input type="text" id="edit-name" class="text-input"
+                 value="{{ user.name }}" maxlength="80"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>E-mail</label>
+        <div class="input-wrap">
+          <input type="email" id="edit-email" class="text-input"
+                 value="{{ user.email }}"/>
+        </div>
+        <small id="email-err" class="field-err"></small>
+      </div>
+    </div>
+
+    <!-- Tab: password -->
+    <div id="tab-pw" class="tab-content" style="display:none">
+      <div class="form-group">
+        <label>Senha atual</label>
+        <div class="input-wrap">
+          <input type="password" id="edit-curpw" class="text-input" placeholder="Senha atual"/>
+          <button type="button" class="toggle-pw" onclick="togglePw('edit-curpw')"style="font-size: 25px;">👁</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Nova senha</label>
+        <div class="input-wrap">
+          <input type="password" id="edit-newpw" class="text-input" placeholder="Mínimo 6 caracteres"/>
+          <button type="button" class="toggle-pw" onclick="togglePw('edit-newpw')"style="font-size: 25px;">👁</button>
+        </div>
+        <small id="pw-err" class="field-err"></small>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeEditModal()">Cancelar</button>
+      <button class="btn btn-primary btn-3d" onclick="saveEdit()">Salvar alterações</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function openEditModal() {
+  document.getElementById('edit-modal').style.display = 'flex';
+  document.getElementById('edit-error').style.display = 'none';
+  document.getElementById('edit-success').style.display = 'none';
+}
+function closeEditModal() { document.getElementById('edit-modal').style.display = 'none'; }
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', (tab==='info'&&i===0)||(tab==='pw'&&i===1)));
+  document.getElementById('tab-info').style.display = tab === 'info' ? 'block' : 'none';
+  document.getElementById('tab-pw').style.display   = tab === 'pw'   ? 'block' : 'none';
+}
+
+function togglePw(id) {
+  const el = document.getElementById(id);
+  el.type = el.type === 'password' ? 'text' : 'password';
+}
+
+async function saveEdit() {
+  const errDiv  = document.getElementById('edit-error');
+  const succDiv = document.getElementById('edit-success');
+  errDiv.style.display = 'none';
+  succDiv.style.display = 'none';
+  document.getElementById('email-err').textContent = '';
+  document.getElementById('pw-err').textContent = '';
+
+  const payload = {
+    name:             document.getElementById('edit-name').value.trim(),
+    email:            document.getElementById('edit-email').value.trim(),
+    current_password: document.getElementById('edit-curpw').value,
+    password:         document.getElementById('edit-newpw').value,
+  };
+
+  const res  = await fetch('/api/profile/update', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json();
+
+  if (data.success) {
+    succDiv.style.display = 'flex';
+    document.getElementById('ph-name').textContent  = data.name;
+    document.getElementById('ph-email').textContent = data.email;
+    document.getElementById('av-display').textContent = data.name[0].toUpperCase();
+    document.getElementById('edit-curpw').value = '';
+    document.getElementById('edit-newpw').value = '';
+    setTimeout(closeEditModal, 1500);
+  } else {
+    const errs = data.errors || {};
+    if (errs.email)    document.getElementById('email-err').textContent = errs.email;
+    if (errs.password) document.getElementById('pw-err').textContent    = errs.password;
+    if (!errs.email && !errs.password) {
+      errDiv.textContent = 'Erro ao salvar. Tente novamente.';
+      errDiv.style.display = 'flex';
+    }
+  }
+}
+</script>
+{% endblock %}

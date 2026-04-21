@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% block title %}Geomix — Aprenda Geometria Plana{% endblock %}
+{% block body %}
+
+<div class="home-page">
+
+  <!-- ── NAVBAR ── -->
+  <nav class="home-nav">
+    <div class="home-nav-logo">
+    <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo Geomix" class="logo-icon">
+    <span class="logo-text">Geomix</span>
+    </div>
+    <div class="home-nav-links">
+      <a href="/login"    class="btn btn-ghost">Entrar</a>
+      <a href="/register" class="btn btn-primary btn-3d btn-sm">Cadastrar-se</a>
+    </div>
+  </nav>
+
+  <!-- ── HERO ── -->
+  <section class="hero-section">
+    <div class="hero-content">
+      <h1 class="hero-title">Geometria Plana<br/>
+        <span class="hero-accent">do jeito certo.</span>
+      </h1>
+      <p class="hero-desc">
+        O Geomix, uma plataforma educacional gamificada de exercitação transformando o aprendizado de
+        geometria plana mais divertido. Aprenda, pratique e domine figuras
+        geométricas com exercícios interativos, trilhas progressivas e recompensas.
+      </p>
+      <div class="hero-actions">
+        <a href="/register" class="btn btn-primary btn-3d btn-lg">
+          Começar Agora
+        </a>
+        <a href="/login" class="btn btn-ghost btn-lg">Já tenho conta</a>
+      </div>
+    </div>
+
+    <div class="hero-visual" aria-hidden="true">
+      <img src="{{ url_for('static', filename='image.png') }}">
+    </div>
+  </section>
+
+  <!-- ── FEATURES ── -->
+  <section class="features-section">
+    <h2 class="section-title-1">Tudo que você precisa para aprender</h2>
+    <div class="features-grid">
+      <div class="feature-card">
+        <h3>Aprendizado Gamificado</h3>
+        <p>Ganhe XP, mantenha sua sequência diária e desbloqueie novas fases como em um jogo.</p>
+      </div>
+      <div class="feature-card">
+        <h3>Trilha Progressiva</h3>
+        <p>5 unidades com 25 atividades cada, totalizan do 150 atividades.</p>
+      </div>
+      <div class="feature-card">
+        <h3>5 Tipos de Exercício</h3>
+        <p>Possui diferentes tipos de exercicio para deixar o aprendizado mais dinâmico.</p>
+      </div>
+      <div class="feature-card">
+        <h3>Feedback Imediato</h3>
+        <p>Saiba na hora se acertou ou errou, com explicação do conteúdo pedagógico.</p>
+      </div>
+      <div class="feature-card">
+        <h3>Figuras em SVG</h3>
+        <p>Todas as figuras geométricas são desenhadas dinamicamente para você visualizar melhor.</p>
+      </div>
+      <div class="feature-card">
+        <h3>Acompanhe seu Progresso</h3>
+        <p>Veja sua evolução em cada unidade, precisão e sequência de dias de estudo.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── UNITS ── -->
+  <section class="units-section">
+    <h2 class="section-title-2">O que você vai aprender</h2>
+    <div class="units-list">
+      <div class="unit-preview-card" style="--uc:#F28F16">
+        <div class="up-num">01</div>
+        <div class="up-body">
+          <div class="up-title">Identificação das Figuras</div>
+          <div class="up-desc">Reconheça quadrado, círculo, triângulo, losango, trapézio, hexágono e mais.</div>
+        </div>
+      </div>
+      <div class="unit-preview-card" style="--uc:#F28F16">
+        <div class="up-num">02</div>
+        <div class="up-body">
+          <div class="up-title">Características das Figuras</div>
+          <div class="up-desc">Lados, vértices, ângulos e propriedades de cada figura plana.</div>
+        </div>
+      </div>
+      <div class="unit-preview-card" style="--uc:#F28F16">
+        <div class="up-num">03</div>
+        <div class="up-body">
+          <div class="up-title">Fórmulas de Área</div>
+          <div class="up-desc">Memorize e entenda as fórmulas de área de todas as figuras planas.</div>
+        </div>
+      </div>
+      <div class="unit-preview-card" style="--uc:#F28F16">
+        <div class="up-num">04</div>
+        <div class="up-body">
+          <div class="up-title">Cálculo de Áreas</div>
+          <div class="up-desc">Aplique as fórmulas em exercícios guiados e problemas contextualizados.</div>
+        </div>
+      </div>
+      <div class="unit-preview-card" style="--uc:#F28F16">
+        <div class="up-num">05</div>
+        <div class="up-body">
+          <div class="up-title">Desafios Integradores</div>
+          <div class="up-desc">Una tudo em missões gamificadas e resolva problemas do cotidiano.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── CTA FINAL ── -->
+  <section class="cta-section">
+    <div class="cta-box">
+      <div class="cta-figures" aria-hidden="true">
+        <svg viewBox="0 0 60 60" width="60" height="60" style="opacity:.25"><polygon points="30,3 57,52 3,52" fill="white" stroke-linejoin="round"/></svg>
+        <svg viewBox="0 0 60 60" width="60" height="60" style="opacity:.2"><circle cx="30" cy="30" r="27" fill="white"/></svg>
+        <svg viewBox="0 0 60 60" width="60" height="60" style="opacity:.25"><rect x="5" y="5" width="50" height="50" fill="white" rx="4"/></svg>
+      </div>
+      <h2>Pronto para começar?</h2>
+      <p>Crie sua conta gratuita e inicie sua jornada na geometria plana hoje mesmo.</p>
+      <a href="/register" class="btn btn-white btn-3d btn-lg">
+        Criar conta
+      </a>
+    </div>
+  </section>
+
+</div>
+{% endblock %}

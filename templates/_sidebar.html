@@ -1,0 +1,47 @@
+{# _sidebar.html — include in every app page with active_page variable #}
+<aside class="sidebar">
+  <a href="/dashboard" class="sidebar-logo">
+    <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo Geomix" class="logo-icon">
+    <span class="logo-text">Geomix</span>
+  </a>
+
+  <nav class="sidebar-nav">
+    <a href="/dashboard" class="nav-item {% if active_page == 'home' %}active{% endif %}">
+      Início
+    </a>
+    <a href="/formulas"  class="nav-item {% if active_page == 'formulas' %}active{% endif %}">
+      Revisão
+    </a>
+    <a href="/profile"   class="nav-item {% if active_page == 'profile' %}active{% endif %}">
+      Meu Perfil
+    </a>
+  </nav>
+
+  <div class="sidebar-user-block">
+    <div class="sub-avatar">{{ user.name[0].upper() }}</div>
+    <div class="sub-info">
+      <span class="sub-name">{{ user.name }}</span>
+      <div class="sub-stats">
+        <span class="sub-stat">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="white" style="vertical-align: middle; margin-right:4px;">
+            <path d="M13 3s-2 2-2 5c0 2 2 3 2 5s-2 3-2 5a5 5 0 0 0 10 0c0-5-6-7-8-15z"/>
+          </svg>
+          {{ user.streak }}
+        </span>
+
+        <span class="sub-stat">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="white" style="vertical-align: middle; margin-right:4px;">
+            <path d="M11 21h-1l1-7H7l6-11h1l-1 7h4z"/>
+          </svg>
+          {{ user.xp }} XP
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="sidebar-bottom">
+    <a href="/logout" class="nav-item nav-logout">
+      Sair
+    </a>
+  </div>
+</aside>

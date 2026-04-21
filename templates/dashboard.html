@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Geomix – Trilha{% endblock %}
+{% block body %}
+
+<div class="app-layout">
+  {% set active_page = 'home' %}
+  {% include '_sidebar.html' %}
+
+  <main class="main-content">
+    <div class="dashboard-header">
+      <h1>Geometria Plana</h1>
+      <p>Aprenda figuras, características e cálculos de área!</p>
+    </div>
+
+    <div class="trail-container">
+      {% for uid, unit in units.items() %}
+        {% set u = uid %}
+        <div class="unit-header" style="--unit-color: {{ unit.color }}">
+          <div>
+            <div class="unit-number">UNIDADE {{ u }}</div>
+            <div class="unit-title">{{ unit.title }}</div>
+            <div class="unit-sub">{{ unit.subtitle }}</div>
+          </div>
+          {% set u_done = namespace(v=0) %}
+          {% for a in range(1,6) %}
+            {% if progress[u|string + '.' + a|string].complete %}
+              {% set u_done.v = u_done.v + 1 %}
+            {% endif %}
+          {% endfor %}
+          <div class="unit-progress-badge">{{ u_done.v }}/5</div>
+        </div>
+
+        <div class="activity-row">
+          {% for aidx in range(1, 6) %}
+            {% set akey = u|string + '.' + aidx|string %}
+            {% set ap = progress[akey] %}
+            {% set act = unit.activities[aidx-1] %}
+            {% set col = (aidx - 1) % 5 %}
+            <div class="node-slot slot-{{ col }}">
+              {% if ap.complete %}
+                <a href="/lesson/{{ u }}/{{ aidx }}" class="node complete" title="{{ act.title }}">
+                  <span class="node-icon">✓</span>
+                </a>
+              {% elif ap.unlocked %}
+                <a href="{% if aidx == 1 %}/intro/{{ u }}{% else %}/lesson/{{ u }}/{{ aidx }}{% endif %}"
+                   class="node unlocked pulse" title="{{ act.title }}">
+                  <span class="node-icon">{{ act.icon }}</span>
+                </a>
+              {% else %}
+                <div class="node locked" title="Bloqueado">
+                  <span class="node-icon">𖥑</span>
+                </div>
+              {% endif %}
+              <div class="node-label">{{ act.title }}</div>
+            </div>
+          {% endfor %}
+        </div>
+
+        {% if not loop.last %}
+        <div class="unit-divider"></div>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </main>
+</div>
+
+{% endblock %}

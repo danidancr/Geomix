@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block title %}{{ activity.title }} – Geomix{% endblock %}
+{% block body %}
+<div class="lesson-page">
+
+  <!-- Top bar -->
+  <header class="lesson-header">
+    <a href="/" class="btn-close" title="Sair">✕</a>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-track">
+        <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+      </div>
+    </div>
+    
+    <div class="xp-chip" id="xp-chip">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="white" style="vertical-align: middle; margin-right:4px;">
+        <path d="M11 21h-1l1-7H7l6-11h1l-1 7h4z"/>
+      </svg>
+     {{ user.xp }} XP
+    </div>
+  </header>
+
+  <!-- Exercise area -->
+  <div class="exercise-area" id="exercise-area">
+    <div class="loading-spinner">⟳</div>
+  </div>
+
+  <!-- Bottom action bar -->
+  <footer class="lesson-footer" id="lesson-footer" style="display:none">
+    <button class="btn btn-primary btn-3d btn-check" id="btn-check" disabled onclick="checkAnswer()">
+      Verificar
+    </button>
+  </footer>
+
+  <!-- Feedback banner -->
+  <div class="feedback-banner" id="feedback-banner" style="display:none">
+    <div class="feedback-inner">
+      <div class="feedback-text">
+        <div class="feedback-title" id="fb-title"></div>
+        <div class="feedback-explanation" id="fb-exp"></div>
+      </div>
+    </div>
+    <button class="btn btn-continue btn-3d" id="btn-continue" onclick="nextQuestion()">
+      Continuar
+    </button>
+  </div>
+</div>
+
+<!-- Completion screen (hidden) -->
+<div class="completion-screen" id="completion-screen" style="display:none">
+  <div class="completion-card">
+    <h2>Atividade Concluída!</h2>
+    <div class="completion-stats">
+      <div class="cstat">
+        <svg width="25" height="25" viewBox="0 0 24 24" fill="white" style="vertical-align: middle; margin-right:4px;">
+          <path d="M11 21h-1l1-7H7l6-11h1l-1 7h4z"/>
+        </svg>
+
+        <span class="cstat-val" id="comp-xp">0</span>
+        <span class="cstat-label">XP ganhos</span>
+      </div>
+      <div class="cstat">
+        <span class="cstat-icon">✓</span>
+        <span class="cstat-val" id="comp-correct">0</span>
+        <span class="cstat-label">Corretas</span>
+      </div>
+    </div>
+    <div class="completion-actions">
+      <a href="/" class="btn btn-secondary">Início</a>
+      {% if activity_id < 5 %}
+      <a href="/lesson/{{ unit_id }}/{{ activity_id + 1 }}" class="btn btn-primary btn-3d">
+        Próxima Atividade
+      </a>
+      {% elif unit_id < 5 %}
+      <a href="/intro/{{ unit_id + 1 }}" class="btn btn-primary btn-3d">
+        Próxima Unidade
+      </a>
+      {% else %}
+      <a href="/" class="btn btn-primary btn-3d">🎓 Concluído!</a>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<script>
+const LESSON_CONFIG = {
+  unitId: {{ unit_id }},
+  activityId: {{ activity_id }},
+  activityTitle: {{ activity.title | tojson }},
+};
+</script>
+{% endblock %}
