@@ -208,15 +208,15 @@ def q_1_4():
         {'id':2,'type':'multiple_choice','question':'Um azulejo de banheiro com todos os lados iguais e cantos em ângulo reto tem formato de qual figura?',
          'figure':None,'options':['Losango','Quadrado','Retângulo','Trapézio'],'correct':1,
          'explanation':'O Quadrado tem 4 lados iguais e 4 ângulos retos — como um azulejo padrão!','xp':10},
-        {'id':3,'type':'multiple_choice','question':'Uma porta de casa (mais alta do que larga) tem formato de qual figura geométrica?',
+        {'id':3,'type':'multiple_choice','question':'Um celular tem o formato de qual figura geométrica?',
          'figure':None,'options':['Quadrado','Trapézio','Losango','Retângulo'],'correct':3,
          'explanation':'Uma porta é um Retângulo: 4 ângulos retos, mas base ≠ altura.','xp':10},
         {'id':4,'type':'multiple_choice','question':'As células de um favo de mel de abelha têm o formato de qual figura?',
          'figure':None,'options':['Triângulo','Quadrado','Hexágono Regular','Círculo'],'correct':2,
          'explanation':'Os favos de mel têm formato de Hexágono Regular — 6 lados iguais que encaixam perfeitamente sem deixar espaço!','xp':10},
-        {'id':5,'type':'multiple_choice','question':'Um Doritos (o salgadinho triangular) tem o formato de qual figura geométrica? 🟠',
+        {'id':5,'type':'multiple_choice','question':'O salgadinho "Doritos" tem o formato de qual figura geométrica?',
          'figure':'doritos','options':['Trapézio','Losango','Triângulo','Retângulo'],'correct':2,
-         'explanation':'O Doritos tem formato de Triângulo — 3 lados e 3 vértices. Agora você vai pensar em geometria toda vez que comer um! 😄','xp':10},
+         'explanation':'O Doritos tem formato de Triângulo — 3 lados e 3 vértices. Agora você vai pensar em geometria toda vez que comer um!','xp':10},
     ]
 
 
