@@ -1,0 +1,223 @@
+{% extends "base.html" %}
+{% block title %}Fórmulas — Geomix{% endblock %}
+{% block body %}
+
+<div class="app-layout">
+  {% set active_page = 'formulas' %}
+  {% include '_sidebar.html' %}
+
+  <main class="main-content">
+    <div class="formulas-page">
+
+      <div class="dashboard-header">
+        <h1>Fórmulas das Áreas das Figuras Planas</h1>
+        <p>Todas as fórmulas de área das figuras planas em um só lugar.</p>
+      </div>
+
+      <div class="formula-quickref">
+        {% set figs = [
+          ('square','Quadrado','A = l²'),
+          ('rectangle','Retângulo','A = b × h'),
+          ('triangle','Triângulo','A = (b×h)/2'),
+          ('circle','Círculo','A = π×r²'),
+          ('rhombus','Losango','A = (D×d)/2'),
+          ('trapezoid','Trapézio','A = ((B+b)×h)/2'),
+          ('equilateral_triangle','Tri. Equilátero','A = (l²√3)/4'),
+          ('hexagon','Hexágono Reg.','A = (3√3×l²)/2'),
+        ] %}
+        {% for fig, name, formula in figs %}
+        <a class="qref-chip" href="#card-{{ fig }}">{{ name }}</a>
+        {% endfor %}
+      </div>
+
+      <div class="formula-grid">
+        <div class="formula-card" id="card-square">
+          <div class="fc-fig" id="svg-square"></div>
+          <div class="fc-body">
+            <div class="fc-name">Quadrado</div>
+            <div class="fc-formula">A = l²</div>
+            <div class="fc-vars">
+              <span class="fc-var"><b>l</b> = lado</span>
+            </div>
+            <div class="fc-example">
+              <div class="fc-ex-title">Exemplo</div>
+              <div>l = 5 cm</div>
+              <div class="fc-ex-calc">A = 5² = <strong>25 cm²</strong></div>
+            </div>
+            <div class="fc-rule">Todos os lados são iguais. Multiplique o lado por ele mesmo.</div>
+          </div>
+        </div>
+
+        <div class="formula-card" id="card-rectangle">
+          <div class="fc-fig" id="svg-rectangle"></div>
+          <div class="fc-body">
+            <div class="fc-name">Retângulo</div>
+            <div class="fc-formula">A = b × h</div>
+            <div class="fc-vars">
+              <span class="fc-var"><b>b</b> = base</span>
+              <span class="fc-var"><b>h</b> = altura</span>
+            </div>
+            <div class="fc-example">
+              <div class="fc-ex-title">Exemplo</div>
+              <div>b = 8 cm, h = 5 cm</div>
+              <div class="fc-ex-calc">A = 8 × 5 = <strong>40 cm²</strong></div>
+            </div>
+            <div class="fc-rule">Base vezes altura. Lados opostos são iguais.</div>
+          </div>
+        </div>
+
+        <div class="formula-card" id="card-triangle">
+          <div class="fc-fig" id="svg-triangle"></div>
+          <div class="fc-body">
+            <div class="fc-name">Triângulo</div>
+            <div class="fc-formula">A = (b × h) / 2</div>
+            <div class="fc-vars">
+              <span class="fc-var"><b>b</b> = base</span>
+              <span class="fc-var"><b>h</b> = altura</span>
+            </div>
+            <div class="fc-example">
+              <div class="fc-ex-title">Exemplo</div>
+              <div>b = 10 cm, h = 6 cm</div>
+              <div class="fc-ex-calc">A = (10 × 6) / 2 = <strong>30 cm²</strong></div>
+            </div>
+            <div class="fc-rule">Metade da área do retângulo de mesma base e altura.</div>
+          </div>
+        </div>
+
+        <div class="formula-card" id="card-circle">
+          <div class="fc-fig" id="svg-circle"></div>
+          <div class="fc-body">
+            <div class="fc-name">Círculo</div>
+            <div class="fc-formula">A = π × r²</div>
+            <div class="fc-vars">
+              <span class="fc-var"><b>r</b> = raio</span>
+              <span class="fc-var"><b>π</b> ≈ 3,14159</span>
+            </div>
+            <div class="fc-example">
+              <div class="fc-ex-title">Exemplo</div>
+              <div>r = 4 cm</div>
+              <div class="fc-ex-calc">A = 3,14 × 4² = 3,14 × 16 = <strong>50,24 cm²</strong></div>
+            </div>
+            <div class="fc-rule">O raio é metade do diâmetro: r = d ÷ 2.</div>
+          </div>
+        </div>
+
+        <div class="formula-card" id="card-rhombus">
+          <div class="fc-fig" id="svg-rhombus"></div>
+          <div class="fc-body">
+            <div class="fc-name">Losango</div>
+            <div class="fc-formula">A = (D × d) / 2</div>
+            <div class="fc-vars">
+              <span class="fc-var"><b>D</b> = diagonal maior</span>
+              <span class="fc-var"><b>d</b> = diagonal menor</span>
+            </div>
+            <div class="fc-example">
+              <div class="fc-ex-title">Exemplo</div>
+              <div>D = 12 cm, d = 8 cm</div>
+              <div class="fc-ex-calc">A = (12 × 8) / 2 = <strong>48 cm²</strong></div>
+            </div>
+            <div class="fc-rule">As diagonais se cruzam perpendicularmente no centro.</div>
+          </div>
+        </div>
+
+        <div class="formula-card" id="card-trapezoid">
+          <div class="fc-fig" id="svg-trapezoid"></div>
+          <div class="fc-body">
+            <div class="fc-name">Trapézio</div>
+            <div class="fc-formula">A = ((B + b) × h) / 2</div>
+            <div class="fc-vars">
+              <span class="fc-var"><b>B</b> = base maior</span>
+              <span class="fc-var"><b>b</b> = base menor</span>
+              <span class="fc-var"><b>h</b> = altura</span>
+            </div>
+            <div class="fc-example">
+              <div class="fc-ex-title">Exemplo</div>
+              <div>B = 12, b = 8, h = 5 cm</div>
+              <div class="fc-ex-calc">A = ((12+8)×5)/2 = 100/2 = <strong>50 cm²</strong></div>
+            </div>
+            <div class="fc-rule">Média das duas bases paralelas, vezes a altura.</div>
+          </div>
+        </div>
+
+        <div class="formula-card" id="card-equilateral_triangle">
+          <div class="fc-fig" id="svg-equilateral_triangle"></div>
+          <div class="fc-body">
+            <div class="fc-name">Triângulo Equilátero</div>
+            <div class="fc-formula">A = (l² × √3) / 4</div>
+            <div class="fc-vars">
+              <span class="fc-var"><b>l</b> = lado</span>
+              <span class="fc-var"><b>√3</b> ≈ 1,732</span>
+            </div>
+            <div class="fc-example">
+              <div class="fc-ex-title">Exemplo</div>
+              <div>l = 6 cm</div>
+              <div class="fc-ex-calc">A = (36 × 1,732) / 4 = 62,35 / 4 ≈ <strong>15,6 cm²</strong></div>
+            </div>
+            <div class="fc-rule">Todos os 3 lados iguais. Ângulos internos de 60° cada.</div>
+          </div>
+        </div>
+
+        <div class="formula-card" id="card-hexagon">
+          <div class="fc-fig" id="svg-hexagon"></div>
+          <div class="fc-body">
+            <div class="fc-name">Hexágono Regular</div>
+            <div class="fc-formula">A = (3√3 × l²) / 2</div>
+            <div class="fc-vars">
+              <span class="fc-var"><b>l</b> = lado</span>
+              <span class="fc-var"><b>√3</b> ≈ 1,732</span>
+            </div>
+            <div class="fc-example">
+              <div class="fc-ex-title">Exemplo</div>
+              <div>l = 4 cm</div>
+              <div class="fc-ex-calc">A = (3×1,732×16)/2 = 83,14/2 ≈ <strong>41,6 cm²</strong></div>
+            </div>
+            <div class="fc-rule">6 lados iguais. Equivale a 6 triângulos equiláteros iguais.</div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="formula-table-wrap">
+        <h2 class="section-h">Resumo</h2>
+        <table class="formula-table">
+          <thead>
+            <tr>
+              <th>Figura</th>
+              <th>Fórmula da Área</th>
+              <th>Elementos</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Quadrado</td>           <td class="mono">A = l²</td>                        <td>l = lado</td></tr>
+            <tr><td>Retângulo</td>          <td class="mono">A = b × h</td>                     <td>b = base, h = altura</td></tr>
+            <tr><td>Triângulo</td>          <td class="mono">A = (b × h) / 2</td>               <td>b = base, h = altura</td></tr>
+            <tr><td>Círculo</td>            <td class="mono">A = π × r²</td>                    <td>r = raio, π ≈ 3,14</td></tr>
+            <tr><td>Losango</td>            <td class="mono">A = (D × d) / 2</td>               <td>D = diag. maior, d = diag. menor</td></tr>
+            <tr><td>Trapézio</td>           <td class="mono">A = ((B + b) × h) / 2</td>         <td>B = base maior, b = base menor, h = alt.</td></tr>
+            <tr><td>Triângulo Equilátero</td><td class="mono">A = (l² × √3) / 4</td>            <td>l = lado, √3 ≈ 1,732</td></tr>
+            <tr><td>Hexágono Regular</td>   <td class="mono">A = (3√3 × l²) / 2</td>           <td>l = lado, √3 ≈ 1,732</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script>
+// Draw SVGs after app.js loads
+window.addEventListener('load', () => {
+  const pairs = [
+    ['svg-square','square'],['svg-rectangle','rectangle'],
+    ['svg-triangle','triangle'],['svg-circle','circle'],
+    ['svg-rhombus','rhombus'],['svg-trapezoid','trapezoid'],
+    ['svg-equilateral_triangle','equilateral_triangle'],
+    ['svg-hexagon','hexagon'],
+  ];
+  pairs.forEach(([id, fig]) => {
+    const el = document.getElementById(id);
+    if (el) el.appendChild(drawFigureSVG(fig, 130, 110));
+  });
+});
+</script>
+{% endblock %}

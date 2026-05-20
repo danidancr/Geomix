@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: geomix
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app -c gunicorn.conf.py
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: FIREBASE_CREDENTIALS
+        sync: false        # você preenche manualmente no painel do Render
+      - key: PYTHON_VERSION
+        value: 3.11.0
