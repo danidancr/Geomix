@@ -663,13 +663,16 @@ a { text-decoration: none; color: inherit; }
 .profile-header-info p  { font-size: .87rem; font-weight: 600; color: var(--white); margin-top: 2px; }
 .profile-header-chips { display: flex; gap: 7px; flex-wrap: wrap; margin-top: 9px; color: var(--white); }
 .chip { display: inline-flex; align-items: center; gap: 4px; border-radius: 16px; padding: 3px 11px; font-size: .76rem; font-weight: 800; }
-.chip-xp     { background: var(--pink); }
-.chip-streak { background: var(--pink); }
-.chip-since  { background: var(--pink); }
+.chip-xp     { background: rgba(0,0,0,.18); }
+.chip-streak { background: #FF6B00; border: 1.5px solid #FF9340; color: #fff; font-size: .82rem; }
+.chip-since  { background: rgba(0,0,0,.18); }
 
 .stats-overview { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; }
 .stat-card { background: var(--white); border: 2px solid var(--pink-dark); border-radius: var(--radius); padding: 18px; text-align: center; transition: transform .15s; }
 .stat-card:hover { transform: translateY(-3px); }
+.stat-card.streak-card { background: #FFF4EC; border-color: #FF6B00; }
+.stat-card.streak-card .sc-val { color: #E05000; }
+.stat-card.streak-card .sc-label { color: #E05000; }
 .sc-val   { font-size: 1.7rem; font-weight: 900; color: var(--primary-dk); }
 .sc-label { font-size: .72rem; font-weight: 800; color: var(--dark); text-transform: uppercase; letter-spacing: .5px; margin-top: 2px; }
 
@@ -693,7 +696,7 @@ a { text-decoration: none; color: inherit; }
 .uprog-title { font-size: .88rem; font-weight: 800; color: var(--dark); }
 .uprog-count { font-size: .76rem; font-weight: 800; color: var(--gray-text); }
 .uprog-bar-track { height: 9px; background: var(--white); border-radius: 6px; overflow: hidden; border: 2px solid #F2D280; margin-bottom: 5px; }
-.uprog-bar-fill  { height: 100%; border-radius: 6px; transition: width .8s cubic-bezier(.34,1.56,.64,1); }
+.uprog-bar-fill  { height: 100%; background: #58CC02; border-radius: 6px; transition: width .8s cubic-bezier(.34,1.56,.64,1); }
 .uprog-detail { font-size: .76rem; font-weight: 600; color: var(--pink-dark); }
 
 .edit-tabs { display: flex; margin-bottom: 18px; border: 2px solid var(--gray); border-radius: 12px; overflow: hidden; }

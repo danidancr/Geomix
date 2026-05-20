@@ -182,6 +182,20 @@ def _add_progress(user_id, unit_id, activity_id, question_id, correct):
     })
 
 
+def _update_progress_to_correct(user_id, unit_id, activity_id, question_id):
+    """Atualiza registro existente de errado → correto quando o aluno refaz e acerta."""
+    docs = (db.collection(PROGRESS_COL)
+              .where('user_id',     '==', str(user_id))
+              .where('unit_id',     '==', unit_id)
+              .where('activity_id', '==', activity_id)
+              .where('question_id', '==', question_id)
+              .limit(1)
+              .stream())
+    for doc in docs:
+        if not doc.to_dict().get('correct'):
+            doc.reference.update({'correct': True, 'answered_at': datetime.utcnow()})
+
+
 # logica do progresso
 
 def get_activity_progress(user_id, unit_id, activity_id, all_rows=None):
@@ -237,7 +251,8 @@ def build_stats(user_id):
                         if is_activity_complete(user_id, uid, a, all_rows))
         rows_u = [r for r in all_rows if r.get('unit_id') == uid]
         corr_u = sum(1 for r in rows_u if r.get('correct'))
-        pct    = round(acts_done / 5 * 100)
+        total_possible = 25   # 5 atividades × 5 questoes cada
+        pct    = min(100, round(corr_u / total_possible * 100))
         units_stats.append({
             'id': uid, 'title': umeta['title'],
             'color': umeta['color'], 'acts_done': acts_done,
@@ -481,7 +496,11 @@ def api_submit():
     is_revision      = already_answered
 
     if not already_answered:
+        # Primeira vez respondendo esta questao
         _add_progress(user['id'], unit_id, activity_id, question_id, correct)
+    elif correct:
+        # Ja respondeu antes: se acertou agora, atualiza registro para correct=True
+        _update_progress_to_correct(user['id'], unit_id, activity_id, question_id)
 
     updates    = {}
     xp_awarded = 0
@@ -491,20 +510,9 @@ def api_submit():
         xp_awarded = max(1, xp_gain // 2) if is_revision else xp_gain
         updates['xp'] = fb_firestore.Increment(xp_awarded)
 
-    today    = date.today()
-    # IMPORTANTE: Firestore nao aceita date, apenas datetime
-    today_dt = datetime(today.year, today.month, today.day)
-    last     = user.get('last_activity')   # date ou None
-    if last != today:
-        if last and isinstance(last, date) and (today - last).days == 1:
-            updates['streak'] = fb_firestore.Increment(1)
-        else:
-            updates['streak'] = 1
-        updates['last_activity'] = today_dt
-
     if updates:
         update_user(user['id'], updates)
-        user = get_user_by_id(user['id'])   # recarrega
+        user = get_user_by_id(user['id'])
 
     return jsonify({
         'success':     True,
@@ -515,7 +523,44 @@ def api_submit():
     })
 
 
-@app.route('/api/progress')
+@app.route('/api/lesson/complete', methods=['POST'])
+@login_required
+def api_lesson_complete():
+    """Chamado quando o aluno termina uma licao (nova ou revisao).
+    Atualiza a ofensiva corretamente: +1 dia se for o primeiro login do dia,
+    incrementa se foi ontem, ou reseta para 1 se passou mais de 1 dia."""
+    user    = current_user()
+    today   = date.today()
+    today_dt = datetime(today.year, today.month, today.day)
+
+    # Normaliza last_activity para date (Firestore devolve datetime)
+    last = user.get('last_activity')
+    if isinstance(last, datetime):
+        last_date = last.date()
+    elif isinstance(last, date):
+        last_date = last
+    else:
+        last_date = None
+
+    updates = {}
+    if last_date != today:
+        # Primeiro acesso do dia
+        if last_date and (today - last_date).days == 1:
+            # Ontem → mantém sequência
+            updates['streak'] = fb_firestore.Increment(1)
+        else:
+            # Mais de 1 dia de intervalo ou nunca jogou → começa do 1
+            updates['streak'] = 1
+        updates['last_activity'] = today_dt
+        update_user(user['id'], updates)
+        user = get_user_by_id(user['id'])
+
+    return jsonify({
+        'success': True,
+        'streak':  user['streak'],
+    })
+
+
 @login_required
 def api_progress():
     user = current_user()

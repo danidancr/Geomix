@@ -808,7 +808,21 @@ if (typeof LESSON_CONFIG !== 'undefined') {
   function showCompletion() {
     compScreen.style.display = 'flex';
     document.getElementById('comp-xp').textContent = xpEarned;
-    document.getElementById('comp-correct').textContent = `${answeredCorrect}/${questions.length}`;
+    document.getElementById('comp-correct').textContent = `${answeredCorrect}/${totalOriginalQuestions}`;
+
+    // Registra conclusão da lição → atualiza ofensiva no servidor
+    fetch('/api/lesson/complete', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    }).then(r => r.json()).then(data => {
+      if (data.streak !== undefined) {
+        const streakChip = document.getElementById('streak-chip');
+        if (streakChip) {
+          streakChip.textContent = '🔥 ' + data.streak;
+          streakChip.style.display = 'flex';
+        }
+      }
+    }).catch(() => {});
   }
 
   async function submitAnswer(q, correct) {

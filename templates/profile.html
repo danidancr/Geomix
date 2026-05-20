@@ -22,10 +22,7 @@
               {{ user.xp }} XP
             </div>
             <div class="chip chip-streak">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="white" style="vertical-align: middle; margin-right:4px;">
-                <path d="M13 3s-2 2-2 5c0 2 2 3 2 5s-2 3-2 5a5 5 0 0 0 10 0c0-5-6-7-8-15z"/>
-              </svg>
-              {{ user.streak }}
+              🔥 {{ user.streak }} dias
             </div>
             <div class="chip chip-since">Desde {{ user.created_at.strftime('%b/%Y') }}</div>
           </div>
@@ -46,8 +43,8 @@
           <div class="sc-val">{{ stats.accuracy }}%</div>
           <div class="sc-label">Precisão Geral</div>
         </div>
-        <div class="stat-card">
-          <div class="sc-val">{{ user.streak }}</div>
+        <div class="stat-card streak-card">
+          <div class="sc-val">🔥 {{ user.streak }}</div>
           <div class="sc-label">Dias Seguidos</div>
         </div>
       </div>
@@ -79,7 +76,7 @@
                 <span class="uprog-count">{{ u.acts_done }}/5 atividades</span>
               </div>
               <div class="uprog-bar-track">
-                <div class="uprog-bar-fill" style="width:{{ u.pct }}%; background:{{ u.color }}"></div>
+                <div class="uprog-bar-fill" style="width:{{ u.pct }}%"></div>
               </div>
               <div class="uprog-detail">
                 {% if u.answered > 0 %}
