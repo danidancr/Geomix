@@ -7,9 +7,23 @@ const FIGURE_NAMES = {
   rhombus: 'Losango',
   circle: 'Círculo',
   hexagon: 'Hexágono Regular',
+  pentagon: 'Pentágono Regular',
+  parallelogram: 'Paralelogramo',
 };
 
 //figuras
+// Paleta variada para reduzir a sensação de repetição visual entre exercícios.
+const FIGURE_PALETTES = [
+  { fill: '#4895D9', stroke: '#173F73' }, // azul
+  { fill: '#58CC02', stroke: '#2E6B00' }, // verde
+  { fill: '#F2A413', stroke: '#8F5E00' }, // âmbar
+  { fill: '#D9307F', stroke: '#7A1246' }, // pink
+  { fill: '#8E5CD9', stroke: '#452985' }, // roxo
+  { fill: '#1AB0A6', stroke: '#0C5C56' }, // teal
+];
+function pickFigurePalette() {
+  return FIGURE_PALETTES[Math.floor(Math.random() * FIGURE_PALETTES.length)];
+}
 function drawFigureSVG(type, w = 120, h = 120) {
   const ns = 'http://www.w3.org/2000/svg';
   const svg = document.createElementNS(ns, 'svg');
@@ -22,8 +36,9 @@ function drawFigureSVG(type, w = 120, h = 120) {
   const H = h - pad * 2;
   const cx = w / 2, cy = h / 2;
 
-  const mainFill = '#4895D9';
-  const stroke   = '#173F73';
+  const palette  = pickFigurePalette();
+  const mainFill = palette.fill;
+  const stroke   = palette.stroke;
   const strokeW  = '2.5';
 
   function poly(pts) {
@@ -107,6 +122,25 @@ function drawFigureSVG(type, w = 120, h = 120) {
       poly(pts);
       break;
     }
+    case 'pentagon': {
+      const R = Math.min(W, H) / 2;
+      const pts = Array.from({length:5}, (_,i) => {
+        const a = -Math.PI/2 + i * 2*Math.PI/5;
+        return [cx + R*Math.cos(a), cy + R*Math.sin(a)];
+      });
+      poly(pts);
+      break;
+    }
+    case 'parallelogram': {
+      const bw = W * 0.7, bh = H * 0.55, skew = W * 0.22;
+      poly([
+        [cx - bw/2 + skew, cy - bh/2],
+        [cx + bw/2 + skew, cy - bh/2],
+        [cx + bw/2 - skew, cy + bh/2],
+        [cx - bw/2 - skew, cy + bh/2],
+      ]);
+      break;
+    }
     case 'doritos': {
       // Doritos: colorful orange triangle with texture lines
       const triH = H * 0.78;
@@ -151,6 +185,47 @@ function drawFigureSVG(type, w = 120, h = 120) {
     }
   }
   return svg;
+}
+
+// ── Sons de feedback (sem dependência de arquivos externos) ──
+let _audioCtx = null;
+function getAudioCtx() {
+  if (!_audioCtx) {
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx) return null;
+    _audioCtx = new Ctx();
+  }
+  if (_audioCtx.state === 'suspended') _audioCtx.resume();
+  return _audioCtx;
+}
+function playTone(freq, startTime, duration, ctx, gainPeak = 0.18, type = 'sine') {
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = type;
+  osc.frequency.value = freq;
+  gain.gain.setValueAtTime(0, startTime);
+  gain.gain.linearRampToValueAtTime(gainPeak, startTime + 0.02);
+  gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.start(startTime);
+  osc.stop(startTime + duration);
+}
+function playCorrectSound() {
+  const ctx = getAudioCtx();
+  if (!ctx) return;
+  const t = ctx.currentTime;
+  // Pequeno arpejo ascendente e alegre
+  playTone(587.33, t,        0.16, ctx); // ré
+  playTone(739.99, t + 0.09, 0.16, ctx); // fá#
+  playTone(987.77, t + 0.18, 0.22, ctx); // si
+}
+function playWrongSound() {
+  const ctx = getAudioCtx();
+  if (!ctx) return;
+  const t = ctx.currentTime;
+  playTone(220,    t,        0.18, ctx, 0.14, 'triangle');
+  playTone(174.61, t + 0.10, 0.22, ctx, 0.14, 'triangle');
 }
 
 // lesson
@@ -405,6 +480,19 @@ if (typeof LESSON_CONFIG !== 'undefined') {
     shuffled.forEach(item => bank.appendChild(createChip(item)));
     area.appendChild(bank);
 
+    // Permite arrastar um chip de volta ao banco para corrigir a resposta.
+    bank.addEventListener('dragover', e => e.preventDefault());
+    bank.addEventListener('drop', e => {
+      e.preventDefault();
+      if (draggingChipEl && draggingChipEl.parentNode !== bank) {
+        const originRow = draggingChipEl.closest('.drag-target');
+        draggingChipEl.remove();
+        if (originRow) originRow.classList.remove('has-chip');
+        bank.appendChild(createChip(e.dataTransfer.getData('text/plain')));
+        checkDragComplete(q, targetsWrap);
+      }
+    });
+
     // Targets
     const targetsWrap = document.createElement('div');
     targetsWrap.className = 'drag-targets';
@@ -442,7 +530,14 @@ if (typeof LESSON_CONFIG !== 'undefined') {
         row.classList.remove('drag-over');
         const chipText = e.dataTransfer.getData('text/plain');
         if (!chipText) return;
-        // Return previous chip to bank
+        // Se o chip veio de outro alvo (ex: usuário está corrigindo/trocando
+        // a resposta), removemos o chip da origem para não duplicá-lo.
+        if (draggingChipEl && draggingChipEl.parentNode && draggingChipEl.parentNode !== zone) {
+          const originRow = draggingChipEl.closest('.drag-target');
+          draggingChipEl.remove();
+          if (originRow && originRow !== row) originRow.classList.remove('has-chip');
+        }
+        // Return previous chip in this zone (if any) to the bank
         const existing = zone.querySelector('.drag-chip');
         if (existing) bank.appendChild(existing);
         const newChip = createChip(chipText);
@@ -465,6 +560,10 @@ if (typeof LESSON_CONFIG !== 'undefined') {
     card.appendChild(area);
   }
 
+  // Referência ao chip sendo arrastado no momento (usada para remover a
+  // origem quando o chip é solto em um novo alvo, evitando duplicação).
+  let draggingChipEl = null;
+
   function createChip(text) {
     const chip = document.createElement('button');
     chip.className = 'drag-chip';
@@ -473,11 +572,13 @@ if (typeof LESSON_CONFIG !== 'undefined') {
     chip.addEventListener('dragstart', e => {
       e.dataTransfer.setData('text/plain', text);
       chip.classList.add('dragging');
+      draggingChipEl = chip;
       setTimeout(() => { if (chip.parentNode) chip.style.opacity = '.4'; }, 0);
     });
     chip.addEventListener('dragend', () => {
       chip.classList.remove('dragging');
       chip.style.opacity = '1';
+      draggingChipEl = null;
     });
     // Touch drag support
     chip.addEventListener('touchstart', handleTouchStart, { passive: true });
@@ -508,25 +609,30 @@ if (typeof LESSON_CONFIG !== 'undefined') {
     if (touchClone) { touchClone.remove(); touchClone = null; }
     const t = e.changedTouches[0];
     const el = document.elementFromPoint(t.clientX, t.clientY);
-    if (!el) return;
+    if (!el || !touchDragging) { touchDragging = null; return; }
+    const bank = document.getElementById('chip-bank');
     const target = el.closest('.drag-target');
-    if (target && touchDragging) {
+    const droppedOnBank = !target && el.closest('#chip-bank');
+    const originRow = touchDragging.closest('.drag-target');
+
+    if (target) {
       const zone = target.querySelector('.target-drop-zone');
-      const bank = document.getElementById('chip-bank');
       const existing = zone.querySelector('.drag-chip');
+      // Remove o chip da origem (banco ou outro alvo) para não duplicar.
+      if (originRow && originRow !== target) originRow.classList.remove('has-chip');
+      touchDragging.remove();
       if (existing && bank) bank.appendChild(existing);
       zone.innerHTML = '';
-      const newChip = createChip(touchDragging.textContent);
-      zone.appendChild(newChip);
+      zone.appendChild(createChip(touchDragging.textContent));
       target.classList.add('has-chip');
-      // Return original to bank
-      if (touchDragging.closest('.drag-target') === null && bank) {
-        // already in bank, remove it
-        touchDragging.remove();
-      } else if (bank) {
-        bank.appendChild(createChip(touchDragging.textContent));
-        touchDragging.remove();
+      if (typeof checkDragComplete === 'function' && zone.closest('.drag-targets')) {
+        checkDragComplete(null, zone.closest('.drag-targets'));
       }
+    } else if (droppedOnBank && originRow) {
+      // Soltar de volta no banco para corrigir a resposta.
+      touchDragging.remove();
+      originRow.classList.remove('has-chip');
+      bank.appendChild(createChip(touchDragging.textContent));
     }
     touchDragging = null;
   }
@@ -619,8 +725,8 @@ if (typeof LESSON_CONFIG !== 'undefined') {
       const rPair = selectedRight.pair;
       const isMatch = lPair.left.value === rPair.left.value;
       if (isMatch) {
-        selectedLeft.el.classList.remove('selected');
-        selectedRight.el.classList.remove('selected');
+        selectedLeft.el.classList.remove('selected', 'wrong-flash');
+        selectedRight.el.classList.remove('selected', 'wrong-flash');
         selectedLeft.el.classList.add('matched');
         selectedRight.el.classList.add('matched');
         matchedCount++;
@@ -629,11 +735,20 @@ if (typeof LESSON_CONFIG !== 'undefined') {
           btnCheck.dataset.matchResult = 'true';
         }
       } else {
-        selectedLeft.el.classList.add('wrong-flash');
-        selectedRight.el.classList.add('wrong-flash');
+        // Guardamos referências locais aos elementos ANTES de zerar as
+        // variáveis externas — caso contrário o setTimeout abaixo sempre
+        // encontrava selectedLeft/selectedRight já nulos (pois eram
+        // zerados de forma síncrona logo em seguida) e a classe
+        // 'wrong-flash' (vermelha) nunca era removida, ficando "presa"
+        // no card mesmo depois de um acerto posterior — misturando
+        // verde e vermelho no mesmo card.
+        const wrongLeftEl  = selectedLeft.el;
+        const wrongRightEl = selectedRight.el;
+        wrongLeftEl.classList.add('wrong-flash');
+        wrongRightEl.classList.add('wrong-flash');
         setTimeout(() => {
-          selectedLeft?.el.classList.remove('wrong-flash', 'selected');
-          selectedRight?.el.classList.remove('wrong-flash', 'selected');
+          wrongLeftEl.classList.remove('wrong-flash', 'selected');
+          wrongRightEl.classList.remove('wrong-flash', 'selected');
         }, 500);
       }
       selectedLeft = null; selectedRight = null;
@@ -732,6 +847,7 @@ if (typeof LESSON_CONFIG !== 'undefined') {
   function showFeedback(correct, q) {
     clearTimer();
     lastWasCorrect = correct;
+    if (correct) playCorrectSound(); else playWrongSound();
 
     // Streak tracking
     if (correct) {

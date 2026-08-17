@@ -400,7 +400,11 @@ a { text-decoration: none; color: inherit; }
   border: 2.5px solid var(--gray); border-radius: var(--radius);
   font-size: .95rem; font-weight: 700; color: var(--dark);
   cursor: pointer; font-family: inherit; text-align: center;
-  min-height: 62px; box-shadow: 0 3px 0 var(--gray);
+  /* Altura fixa (não apenas mínima) para que nenhuma alternativa jamais
+     pareça maior que as demais só por ter um texto mais longo — a
+     resposta certa não deve dar pistas pelo tamanho do botão. */
+  height: 74px; box-shadow: 0 3px 0 var(--gray);
+  overflow: hidden; line-height: 1.2;
   transition: border-color .15s, background .15s, transform .1s;
 }
 .option-btn:hover    { border-color: var(--teal); background: var(--bg2); transform: translateY(-2px); }

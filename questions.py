@@ -51,15 +51,19 @@ UNITS_META = {
         'color': '#D9307F',
         'intro_title': 'Fórmulas de Área das Figuras Planas',
         'intro_text': (
-            'A área mede a superfície de uma figura plana. '
-            'Cada figura tem sua própria fórmula. O quadrado usa A = l² (lado ao quadrado). '
-            'O círculo usa A = π × r² (π ≈ 3,14). O triângulo usa A = (base × altura) ÷ 2. '
-            'Nesta unidade você vai conhecer, memorizar e aplicar todas essas fórmulas!'
+            'A área mede a superfície de uma figura plana. Cada figura tem sua própria fórmula — '
+            'confira todas antes de começar: '
+            'Quadrado: A = l² (lado ao quadrado). '
+            'Retângulo: A = b × h (base vezes altura). '
+            'Triângulo: A = (base × altura) ÷ 2. '
+            'Trapézio: A = ((base maior + base menor) × altura) ÷ 2. '
+            'Círculo: A = π × r² (π ≈ 3,14). '
+            'Nesta unidade você vai revisar essas fórmulas antes de praticar cada parte delas!'
         ),
-        'intro_figures': ['square','circle','triangle','trapezoid'],
+        'intro_figures': ['square','rectangle','triangle','trapezoid','circle'],
         'activities': [
-            {'title': 'Completar fórmulas',          'type': 'fill_blank',     'icon': '𖥑'},
             {'title': 'Relacionar figura-fórmula',   'type': 'memory_match',   'icon': '𖥑'},
+            {'title': 'Completar fórmulas',          'type': 'fill_blank',     'icon': '𖥑'},
             {'title': 'Encontrar o erro',            'type': 'multiple_choice','icon': '𖥑'},
             {'title': 'Ordenar etapas',              'type': 'order_steps',    'icon': '𖥑'},
             {'title': 'Quiz conceitual',             'type': 'multiple_choice','icon': '𖥑'},
@@ -139,17 +143,17 @@ def q_1_2():
          'options':['rhombus','square','rectangle','triangle'],'correct':0,
          'explanation':'O Losango tem 4 lados iguais, mas seus ângulos não são necessariamente retos.','xp':10},
         {'id':2,'type':'multiple_choice_figure','question':'Qual dessas figuras é um RETÂNGULO?',
-         'options':['square','rectangle','trapezoid','rhombus'],'correct':1,
+         'options':['square','rectangle','parallelogram','rhombus'],'correct':1,
          'explanation':'O Retângulo tem 4 ângulos retos e lados opostos iguais (base ≠ altura).','xp':10},
         {'id':3,'type':'multiple_choice_figure','question':'Qual dessas figuras é um TRIÂNGULO EQUILÁTERO?',
          'options':['triangle','equilateral_triangle','rhombus','trapezoid'],'correct':1,
          'explanation':'O Triângulo Equilátero tem os 3 lados iguais e os 3 ângulos iguais a 60°.','xp':10},
         {'id':4,'type':'multiple_choice_figure','question':'Qual dessas figuras é um CÍRCULO?',
-         'options':['hexagon','rhombus','circle','equilateral_triangle'],'correct':2,
+         'options':['hexagon','rhombus','circle','pentagon'],'correct':2,
          'explanation':'O Círculo é a única figura plana completamente arredondada, sem lados retos.','xp':10},
         {'id':5,'type':'multiple_choice_figure','question':'Qual dessas figuras é um HEXÁGONO REGULAR?',
          'options':['trapezoid','circle','square','hexagon'],'correct':3,
-         'explanation':'O Hexágono Regular tem 6 lados iguais — é a forma das células de favo de mel!','xp':10},
+         'explanation':'O Hexágono Regular tem 6 lados iguais — é a forma das células das colmeias de abelhas!','xp':10},
     ]
 
 
@@ -211,9 +215,9 @@ def q_1_4():
         {'id':3,'type':'multiple_choice','question':'Um celular tem o formato de qual figura geométrica?',
          'figure':None,'options':['Quadrado','Trapézio','Losango','Retângulo'],'correct':3,
          'explanation':'Uma porta é um Retângulo: 4 ângulos retos, mas base ≠ altura.','xp':10},
-        {'id':4,'type':'multiple_choice','question':'As células de um favo de mel de abelha têm o formato de qual figura?',
+        {'id':4,'type':'multiple_choice','question':'As colmeias de abelhas são feitas de várias células (pequenos compartimentos) grudadas lado a lado. Cada célula individual tem o formato de qual figura?',
          'figure':None,'options':['Triângulo','Quadrado','Hexágono Regular','Círculo'],'correct':2,
-         'explanation':'Os favos de mel têm formato de Hexágono Regular — 6 lados iguais que encaixam perfeitamente sem deixar espaço!','xp':10},
+         'explanation':'Cada célula da colmeia tem formato de Hexágono Regular — 6 lados iguais que encaixam perfeitamente sem deixar espaço!','xp':10},
         {'id':5,'type':'multiple_choice','question':'O salgadinho "Doritos" tem o formato de qual figura geométrica?',
          'figure':'doritos','options':['Trapézio','Losango','Triângulo','Retângulo'],'correct':2,
          'explanation':'O Doritos tem formato de Triângulo — 3 lados e 3 vértices. Agora você vai pensar em geometria toda vez que comer um!','xp':10},
@@ -271,7 +275,7 @@ def q_2_2():
          'items':['Base','Altura','Raio'],
          'targets':[
              {'id':'base','text':'Lado inferior de uma figura geométrica','correct':'Base'},
-             {'id':'altura','text':'Distância perpendicular entre a base e o lado/vértice oposto','correct':'Altura'},
+             {'id':'altura','text':'Distância em linha reta (formando um ângulo de 90°) entre a base e o lado/vértice oposto','correct':'Altura'},
              {'id':'raio','text':'Distância do centro ao perímetro do círculo','correct':'Raio'},
          ],'explanation':'Base, altura e raio são elementos fundamentais para calcular áreas.','xp':15},
         {'id':2,'type':'drag_drop',
@@ -279,7 +283,7 @@ def q_2_2():
          'items':['Círculo','Losango','Trapézio'],
          'targets':[
              {'id':'ci','text':'Possui raio (r) e diâmetro (d = 2r)','correct':'Círculo'},
-             {'id':'rh','text':'Possui diagonal maior (D) e diagonal menor (d)','correct':'Losando'},
+             {'id':'rh','text':'Possui diagonal maior (D) e diagonal menor (d)','correct':'Losango'},
              {'id':'tp','text':'Possui base maior (B) e base menor (b)','correct':'Trapézio'},
          ],'explanation':'Losango→diagonais; Trapézio→duas bases; Círculo→raio.','xp':15},
         {'id':3,'type':'drag_drop',
@@ -411,19 +415,19 @@ def q_2_5():
 def q_3_1():
     """Atividade 3.1 – Completar fórmulas (fill-blank)"""
     return [
-        {'id':1,'type':'fill_blank','question':'A fórmula da área do Quadrado é A = l___\n(onde l = lado)',
-         'figure':'square','answer':'l^2','hint':'Lado vezes lado = l ao quadrado',
+        {'id':1,'type':'fill_blank','question':'A fórmula da área do Quadrado é A = l ___\n(onde l = lado). Digite apenas o número do expoente que falta.',
+         'figure':'square','answer':'2','hint':'Lado vezes lado = l elevado a que número?',
          'explanation':'A = l² significa que multiplicamos o lado por ele mesmo. Ex: l=5 → A = 5² = 25 cm².','xp':10},
-        {'id':2,'type':'fill_blank','question':'A fórmula da área do Triângulo é A = (b × h) / ___\n(onde b = base, h = altura)',
+        {'id':2,'type':'fill_blank','question':'A fórmula da área do Triângulo é A = (b × h) / ___\n(onde b = base, h = altura). Digite apenas o número que falta.',
          'figure':'triangle','answer':'2','hint':'A área do triângulo é metade do retângulo de mesma base e altura',
          'explanation':'A = (b × h) / 2. Dividimos por 2 porque o triângulo ocupa metade do retângulo de mesma base e altura.','xp':10},
-        {'id':3,'type':'fill_blank','question':'A fórmula da área do Círculo é A = ___ × r²\n(onde r = raio)',
+        {'id':3,'type':'fill_blank','question':'A fórmula da área do Círculo é A = ___ × r²\n(onde r = raio). Digite o nome da constante (em letras, ex: pi).',
          'figure':'circle','answer':'pi','hint':'É uma constante que começa com a letra grega π (pi)',
          'explanation':'A = π × r². O valor de π ≈ 3,14159. Ele representa a relação entre a circunferência e o diâmetro.','xp':10},
-        {'id':4,'type':'fill_blank','question':'A fórmula da área do Retângulo é A = b × ___\n(onde b = base)',
+        {'id':4,'type':'fill_blank','question':'A fórmula da área do Retângulo é A = b × ___\n(onde b = base). Digite apenas a letra que falta.',
          'figure':'rectangle','answer':'h','hint':'O outro elemento além da base é a...',
-         'explanation':'A = b × h (base vezes altura). No retângulo, base e altura são perpendiculares entre si.','xp':10},
-        {'id':5,'type':'fill_blank','question':'A fórmula da área do Trapézio é A = ((B + b) × h) / ___\n(onde B = base maior, b = base menor, h = altura)',
+         'explanation':'A = b × h (base vezes altura). No retângulo, base e altura formam um ângulo reto (90°) entre si.','xp':10},
+        {'id':5,'type':'fill_blank','question':'A fórmula da área do Trapézio é A = ((B + b) × h) / ___\n(onde B = base maior, b = base menor, h = altura). Digite apenas o número que falta.',
          'figure':'trapezoid','answer':'2','hint':'A média das bases, vezes a altura',
          'explanation':'A = ((B + b) × h) / 2. Calculamos a média das duas bases e multiplicamos pela altura.','xp':10},
     ]
@@ -823,7 +827,10 @@ def q_5_5():
 _REGISTRY = {
     (1,1): q_1_1, (1,2): q_1_2, (1,3): q_1_3, (1,4): q_1_4, (1,5): q_1_5,
     (2,1): q_2_1, (2,2): q_2_2, (2,3): q_2_3, (2,4): q_2_4, (2,5): q_2_5,
-    (3,1): q_3_1, (3,2): q_3_2, (3,3): q_3_3, (3,4): q_3_4, (3,5): q_3_5,
+    # Atividades 3.1 e 3.2 invertidas de propósito: primeiro relacionar
+    # figura↔fórmula (reconhecimento, com a fórmula já visível) e só depois
+    # completar a fórmula de memória (recall) — ver UNITS_META[3]['activities'].
+    (3,1): q_3_2, (3,2): q_3_1, (3,3): q_3_3, (3,4): q_3_4, (3,5): q_3_5,
     (4,1): q_4_1, (4,2): q_4_2, (4,3): q_4_3, (4,4): q_4_4, (4,5): q_4_5,
     (5,1): q_5_1, (5,2): q_5_2, (5,3): q_5_3, (5,4): q_5_4, (5,5): q_5_5,
 }
