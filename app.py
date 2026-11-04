@@ -68,12 +68,12 @@ def _doc_to_user(doc):
     return data
 
 
- get_user_by_id(uid):
+def get_user_by_id(uid):
     doc = db.collection(USERS_COL).document(str(uid)).get()
     return _doc_to_user(doc)
 
 
- get_user_by_email(email):
+def get_user_by_email(email):
     docs = (db.collection(USERS_COL)
               .where('email', '==', email)
               .limit(1)
@@ -108,6 +108,7 @@ def current_user():
     uid = session.get('user_id')
     return get_user_by_id(uid) if uid else None
 
+
 def validate_password_strength(password):
     """
     Valida se a senha tem no mínimo 6 caracteres, 
@@ -122,7 +123,8 @@ def validate_password_strength(password):
     if not re.search(r'[^A-Za-z0-9]', password):
         return 'A senha deve conter pelo menos um caractere especial (ex: @, #, $, !).'
     return None
-  
+
+
 # autenticar
 def hash_pw(pw):
     return hashlib.sha256(pw.encode()).hexdigest()
@@ -149,11 +151,6 @@ def login_required(f):
 # bd de progresso
 
 def _get_all_progress(user_id):
-    """
-    Busca todos os registros de progresso do usuario em uma unica chamada.
-    Filtros por unit/activity sao feitos em Python para evitar indices
-    compostos adicionais no Firestore.
-    """
     docs = (db.collection(PROGRESS_COL)
               .where('user_id', '==', str(user_id))
               .stream())
@@ -169,7 +166,6 @@ def _get_all_progress(user_id):
 
 
 def _progress_exists(user_id, unit_id, activity_id, question_id):
-    """Verifica se ja existe registro para essa questao especifica."""
     docs = (db.collection(PROGRESS_COL)
               .where('user_id',     '==', str(user_id))
               .where('unit_id',     '==', unit_id)
@@ -194,7 +190,6 @@ def _add_progress(user_id, unit_id, activity_id, question_id, correct):
 
 
 def _update_progress_to_correct(user_id, unit_id, activity_id, question_id):
-    """Atualiza registro existente de errado → correto quando o aluno refaz e acerta."""
     docs = (db.collection(PROGRESS_COL)
               .where('user_id',     '==', str(user_id))
               .where('unit_id',     '==', unit_id)
@@ -262,7 +257,7 @@ def build_stats(user_id):
                         if is_activity_complete(user_id, uid, a, all_rows))
         rows_u = [r for r in all_rows if r.get('unit_id') == uid]
         corr_u = sum(1 for r in rows_u if r.get('correct'))
-        total_possible = 25   # 5 atividades × 5 questoes cada
+        total_possible = 25
         pct    = min(100, round(corr_u / total_possible * 100))
         units_stats.append({
             'id': uid, 'title': umeta['title'],
@@ -321,7 +316,6 @@ def register():
         password = request.form.get('password', '')
         confirm  = request.form.get('confirm',  '')
 
-        # Validação do formato do e-mail
         email_regex = r'^[\w\.-]+@[\w\.-]+\.\w+$'
 
         if not name or not email or not password:
@@ -477,9 +471,7 @@ def profile():
     return render_template('profile.html', user=user, stats=stats)
 
 
-# ─────────────────────────────────────────
-#  API
-# ─────────────────────────────────────────
+# API
 
 @app.route('/ranking')
 @login_required
@@ -515,22 +507,18 @@ def api_submit():
     correct     = data.get('correct', False)
     xp_gain     = data.get('xp', 10)
 
-    # Detecta revisao (questao ja respondida = atividade sendo refeita)
     already_answered = _progress_exists(user['id'], unit_id, activity_id, question_id)
     is_revision      = already_answered
 
     if not already_answered:
-        # Primeira vez respondendo esta questao
         _add_progress(user['id'], unit_id, activity_id, question_id, correct)
     elif correct:
-        # Ja respondeu antes: se acertou agora, atualiza registro para correct=True
         _update_progress_to_correct(user['id'], unit_id, activity_id, question_id)
 
     updates    = {}
     xp_awarded = 0
 
     if correct:
-        # Revisao = metade do XP; primeira vez = XP completo
         xp_awarded = max(1, xp_gain // 2) if is_revision else xp_gain
         updates['xp'] = fb_firestore.Increment(xp_awarded)
 
@@ -550,14 +538,10 @@ def api_submit():
 @app.route('/api/lesson/complete', methods=['POST'])
 @login_required
 def api_lesson_complete():
-    """Chamado quando o aluno termina uma licao (nova ou revisao).
-    Atualiza a ofensiva corretamente: +1 dia se for o primeiro login do dia,
-    incrementa se foi ontem, ou reseta para 1 se passou mais de 1 dia."""
-    user    = current_user()
-    today   = date.today()
+    user     = current_user()
+    today    = date.today()
     today_dt = datetime(today.year, today.month, today.day)
 
-    # Normaliza last_activity para date (Firestore devolve datetime)
     last = user.get('last_activity')
     if isinstance(last, datetime):
         last_date = last.date()
@@ -568,12 +552,9 @@ def api_lesson_complete():
 
     updates = {}
     if last_date != today:
-        # Primeiro acesso do dia
         if last_date and (today - last_date).days == 1:
-            # Ontem → mantém sequência
             updates['streak'] = fb_firestore.Increment(1)
         else:
-            # Mais de 1 dia de intervalo ou nunca jogou → começa do 1
             updates['streak'] = 1
         updates['last_activity'] = today_dt
         update_user(user['id'], updates)
@@ -585,12 +566,13 @@ def api_lesson_complete():
     })
 
 
+@app.route('/api/progress')
 @login_required
 def api_progress():
     user = current_user()
     return jsonify({
-        'xp':      user['xp'],
-        'streak':  user['streak'],
+        'xp':       user['xp'],
+        'streak':   user['streak'],
         'progress': build_progress_map(user['id']),
     })
 
@@ -642,6 +624,7 @@ def api_profile_update():
         user = get_user_by_id(user['id'])
 
     return jsonify({'success': True, 'name': user['name'], 'email': user['email']})
+
 
 # jinja2
 
