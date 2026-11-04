@@ -92,8 +92,8 @@ a { text-decoration: none; color: inherit; }
   transition: background .15s, color .15s;
   cursor: pointer;
 }
-.nav-item:hover  { background: var(--primary); color: var(--white); }
-.nav-item.active { background: var(--amber); color: var(--white); box-shadow: var(--shadow) var(--primary-dk); }
+.nav-item:hover  { background: var(--primary-dk); color: var(--white); }
+.nav-item.active { background: var(--amber); color: var(--primary-dk); box-shadow: var(--shadow) var(--primary-dk); }
 .sidebar-user-block {
   display: flex;
   align-items: center;
