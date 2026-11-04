@@ -14,11 +14,11 @@
   </div>
   {% endif %}
 
-  <form method="POST" class="auth-form" novalidate>
+  <form method="POST" class="auth-form" novalidate id="registerForm">
     <div class="form-group">
-      <label for="name">Nome completo</label>
+      <label for="name">Nome</label>
       <div class="input-wrap">
-        <input type="text" id="name" name="name" placeholder="Seu nome"
+        <input type="text" id="name" name="name" maxlength="20" placeholder="Seu nome (máx 20 caracteres)"
                value="{{ request.form.get('name', '') }}" required autocomplete="name"/>
       </div>
     </div>
@@ -35,8 +35,15 @@
       <label for="password">Senha</label>
       <div class="input-wrap">
         <input type="password" id="password" name="password"
-               placeholder="Mínimo 6 caracteres" required autocomplete="new-password"/>
-        <button type="button" class="toggle-pw" onclick="togglePw('password')"style="font-size: 25px;">👁</button>
+               placeholder="Sua senha" required autocomplete="new-password"/>
+        <button type="button" class="toggle-pw" onclick="togglePw('password')" style="font-size: 25px;">👁</button>
+      </div>
+      <!-- Guia de requisitos de senha em tempo real -->
+      <div class="pw-requirements" style="font-size: 13px; margin-top: 8px; color: #666;">
+        <p style="margin: 2px 0;" id="req-len">❌ Pelo menos 6 caracteres</p>
+        <p style="margin: 2px 0;" id="req-letter">❌ Pelo menos uma letra</p>
+        <p style="margin: 2px 0;" id="req-num">❌ Pelo menos um número</p>
+        <p style="margin: 2px 0;" id="req-spec">❌ Pelo menos um caractere especial (@, #, $, !, etc.)</p>
       </div>
     </div>
 
@@ -45,7 +52,7 @@
       <div class="input-wrap">
         <input type="password" id="confirm" name="confirm"
                placeholder="Repita a senha" required autocomplete="new-password"/>
-        <button type="button" class="toggle-pw" onclick="togglePw('confirm')"style="font-size: 25px;">👁</button>
+        <button type="button" class="toggle-pw" onclick="togglePw('confirm')" style="font-size: 25px;">👁</button>
       </div>
     </div>
 
@@ -64,5 +71,51 @@ function togglePw(id) {
   const el = document.getElementById(id);
   el.type = el.type === 'password' ? 'text' : 'password';
 }
+
+const pwInput = document.getElementById('password');
+const reqLen = document.getElementById('req-len');
+const reqLetter = document.getElementById('req-letter');
+const reqNum = document.getElementById('req-num');
+const reqSpec = document.getElementById('req-spec');
+
+pwInput.addEventListener('input', () => {
+  const val = pwInput.value;
+  
+  // Valida tamanho
+  if (val.length >= 6) {
+    reqLen.textContent = '✔️ Pelo menos 6 caracteres';
+    reqLen.style.color = 'green';
+  } else {
+    reqLen.textContent = '❌ Pelo menos 6 caracteres';
+    reqLen.style.color = '#666';
+  }
+
+  // Valida letra
+  if (/[A-Za-z]/.test(val)) {
+    reqLetter.textContent = '✔️ Pelo menos uma letra';
+    reqLetter.style.color = 'green';
+  } else {
+    reqLetter.textContent = '❌ Pelo menos uma letra';
+    reqLetter.style.color = '#666';
+  }
+
+  // Valida número
+  if (/\d/.test(val)) {
+    reqNum.textContent = '✔️ Pelo menos um número';
+    reqNum.style.color = 'green';
+  } else {
+    reqNum.textContent = '❌ Pelo menos um número';
+    reqNum.style.color = '#666';
+  }
+
+  // Valida caractere especial
+  if (/[^A-Za-z0-9]/.test(val)) {
+    reqSpec.textContent = '✔️ Pelo menos um caractere especial (@, #, $, !, etc.)';
+    reqSpec.style.color = 'green';
+  } else {
+    reqSpec.textContent = '❌ Pelo menos um caractere especial (@, #, $, !, etc.)';
+    reqSpec.style.color = '#666';
+  }
+});
 </script>
 {% endblock %}
