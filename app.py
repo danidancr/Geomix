@@ -31,7 +31,7 @@ PROGRESS_COL = 'progress'
 
 # ajuste de data
 
-def _to_date(val):
+ _to_date(val):
     if val is None:
         return None
     if isinstance(val, date) and not isinstance(val, datetime):
@@ -45,7 +45,7 @@ def _to_date(val):
     return None
 
 
-def _to_naive_dt(val):
+ _to_naive_dt(val):
     if val is None:
         return None
     if isinstance(val, datetime):
@@ -57,25 +57,23 @@ def _to_naive_dt(val):
 
 # bd usuarios
 
-def _doc_to_user(doc):
+ _doc_to_user(doc):
     if not doc.exists:
         return None
     data = doc.to_dict()
     data['id']                 = doc.id
     data['last_activity']      = _to_date(data.get('last_activity'))
     data['reset_token_expiry'] = _to_naive_dt(data.get('reset_token_expiry'))
-    # Garante que created_at seja um datetime naive (sem timezone)
-    # para que strftime() funcione normalmente nos templates.
     data['created_at']         = _to_naive_dt(data.get('created_at')) or datetime.utcnow()
     return data
 
 
-def get_user_by_id(uid):
+ get_user_by_id(uid):
     doc = db.collection(USERS_COL).document(str(uid)).get()
     return _doc_to_user(doc)
 
 
-def get_user_by_email(email):
+ get_user_by_email(email):
     docs = (db.collection(USERS_COL)
               .where('email', '==', email)
               .limit(1)
@@ -103,7 +101,6 @@ def create_user(name, email, password_hash):
 
 
 def update_user(uid, updates):
-    """Atualiza campos de um documento de usuario no Firestore."""
     db.collection(USERS_COL).document(str(uid)).update(updates)
 
 
@@ -111,7 +108,21 @@ def current_user():
     uid = session.get('user_id')
     return get_user_by_id(uid) if uid else None
 
-
+def validate_password_strength(password):
+    """
+    Valida se a senha tem no mínimo 6 caracteres, 
+    contém pelo menos uma letra, um número e um caractere especial.
+    """
+    if len(password) < 6:
+        return 'A senha deve ter pelo menos 6 caracteres.'
+    if not re.search(r'[A-Za-z]', password):
+        return 'A senha deve conter pelo menos uma letra.'
+    if not re.search(r'\d', password):
+        return 'A senha deve conter pelo menos um número.'
+    if not re.search(r'[^A-Za-z0-9]', password):
+        return 'A senha deve conter pelo menos um caractere especial (ex: @, #, $, !).'
+    return None
+  
 # autenticar
 def hash_pw(pw):
     return hashlib.sha256(pw.encode()).hexdigest()
@@ -310,18 +321,28 @@ def register():
         password = request.form.get('password', '')
         confirm  = request.form.get('confirm',  '')
 
+        # Validação do formato do e-mail
+        email_regex = r'^[\w\.-]+@[\w\.-]+\.\w+$'
+
         if not name or not email or not password:
             error = 'Preencha todos os campos.'
-        elif len(password) < 6:
-            error = 'A senha deve ter pelo menos 6 caracteres.'
-        elif password != confirm:
-            error = 'As senhas nao coincidem.'
-        elif get_user_by_email(email):
-            error = 'Este e-mail ja esta cadastrado.'
+        elif len(name) > 20:
+            error = 'O nome deve ter no máximo 20 caracteres.'
+        elif not re.match(email_regex, email):
+            error = 'Por favor, insira um e-mail válido.'
         else:
-            user = create_user(name, email, hash_pw(password))
-            session['user_id'] = user['id']
-            return redirect(url_for('dashboard'))
+            pw_error = validate_password_strength(password)
+            if pw_error:
+                error = pw_error
+            elif password != confirm:
+                error = 'As senhas não coincidem.'
+            elif get_user_by_email(email):
+                error = 'Este e-mail já está cadastrado.'
+            else:
+                user = create_user(name, email, hash_pw(password))
+                session['user_id'] = user['id']
+                return redirect(url_for('dashboard'))
+                
     return render_template('register.html', error=error)
 
 
@@ -387,10 +408,12 @@ def reset_password(token):
     if request.method == 'POST':
         pw      = request.form.get('password', '')
         confirm = request.form.get('confirm',  '')
-        if len(pw) < 6:
-            error = 'A senha deve ter pelo menos 6 caracteres.'
+        
+        pw_error = validate_password_strength(pw)
+        if pw_error:
+            error = pw_error
         elif pw != confirm:
-            error = 'As senhas nao coincidem.'
+            error = 'As senhas não coincidem.'
         else:
             update_user(user['id'], {
                 'password_hash':      hash_pw(pw),
@@ -398,6 +421,7 @@ def reset_password(token):
                 'reset_token_expiry': None,
             })
             return redirect(url_for('login'))
+            
     return render_template('reset_password.html', expired=False, token=token, error=error)
 
 
@@ -584,22 +608,31 @@ def api_profile_update():
     new_pw    = data.get('password',         '').strip()
     cur_pw    = data.get('current_password', '').strip()
 
+    email_regex = r'^[\w\.-]+@[\w\.-]+\.\w+$'
+
     if new_name:
-        updates['name'] = new_name[:80]
+        if len(new_name) > 20:
+            errors['name'] = 'O nome deve ter no máximo 20 caracteres.'
+        else:
+            updates['name'] = new_name
 
     if new_email and new_email != user['email']:
-        if get_user_by_email(new_email):
-            errors['email'] = 'Este e-mail ja esta em uso.'
+        if not re.match(email_regex, new_email):
+            errors['email'] = 'Por favor, insira um e-mail válido.'
+        elif get_user_by_email(new_email):
+            errors['email'] = 'Este e-mail já está em uso.'
         else:
             updates['email'] = new_email
 
     if new_pw:
         if not verify_pw(cur_pw, user['password_hash']):
             errors['password'] = 'Senha atual incorreta.'
-        elif len(new_pw) < 6:
-            errors['password'] = 'Nova senha deve ter ao menos 6 caracteres.'
         else:
-            updates['password_hash'] = hash_pw(new_pw)
+            pw_error = validate_password_strength(new_pw)
+            if pw_error:
+                errors['password'] = pw_error
+            else:
+                updates['password_hash'] = hash_pw(new_pw)
 
     if errors:
         return jsonify({'success': False, 'errors': errors}), 400
@@ -609,7 +642,6 @@ def api_profile_update():
         user = get_user_by_id(user['id'])
 
     return jsonify({'success': True, 'name': user['name'], 'email': user['email']})
-
 
 # jinja2
 
