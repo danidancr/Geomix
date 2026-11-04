@@ -31,7 +31,7 @@ PROGRESS_COL = 'progress'
 
 # ajuste de data
 
- _to_date(val):
+def _to_date(val):
     if val is None:
         return None
     if isinstance(val, date) and not isinstance(val, datetime):
