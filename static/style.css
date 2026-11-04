@@ -73,7 +73,7 @@ a { text-decoration: none; color: inherit; }
   object-fit: contain;
 }
 .logo-text { 
-  font-size: 1.5rem; 
+  font-size: 2rem; 
   font-weight: 900; 
   letter-spacing: -.5px; 
   color: var(--white); 
@@ -85,7 +85,7 @@ a { text-decoration: none; color: inherit; }
   gap: 10px;
   padding: 11px 14px;
   border-radius: 12px;
-  font-size: .9rem;
+  font-size: 1.5rem;
   font-weight: 700;
   color: var(--white);
   text-decoration: none;
