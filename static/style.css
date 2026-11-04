@@ -47,7 +47,7 @@ a { text-decoration: none; color: inherit; }
 .sidebar {
   width: 250px;
   flex-shrink: 0;
-  background: var(--primary);
+  background: var(--primary-dk);
   display: flex;
   flex-direction: column;
   padding: 20px 14px;
@@ -92,8 +92,8 @@ a { text-decoration: none; color: inherit; }
   transition: background .15s, color .15s;
   cursor: pointer;
 }
-.nav-item:hover  { background: var(--pink-dark); color: var(--white); }
-.nav-item.active { background: var(--primary-dk); color: var(--white); box-shadow: var(--shadow) var(--amber); }
+.nav-item:hover  { background: var(--pink); color: var(--white); }
+.nav-item.active { background: var(--pink-dark); color: var(--white); box-shadow: var(--shadow) var(--primary); }
 .sidebar-user-block {
   display: flex;
   align-items: center;
