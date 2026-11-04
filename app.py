@@ -45,7 +45,7 @@ def _to_date(val):
     return None
 
 
- _to_naive_dt(val):
+def _to_naive_dt(val):
     if val is None:
         return None
     if isinstance(val, datetime):
@@ -57,7 +57,7 @@ def _to_date(val):
 
 # bd usuarios
 
- _doc_to_user(doc):
+def _doc_to_user(doc):
     if not doc.exists:
         return None
     data = doc.to_dict()
