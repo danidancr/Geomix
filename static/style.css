@@ -1,31 +1,38 @@
 :root {
-  /* Brand palette */
-  --pink:       #D9307F;
-  --pink-dark:  #A8205F;
-  --teal:       #2CA4BF;
-  --teal-dark:  #1A7A8F;
-  --amber:      #F2A413;
-  --amber-dark: #F28F16;
-  --black:      #0D0D0D;
+  --pink: #D91A72;
+  --pink-dark: #8C0040;
+  --pink-light: #FFF0F5;
 
-  --primary:    var(--teal);
-  --primary-dk: var(--teal-dark);
-  --accent:     var(--pink);
+  --teal: #0083A0;
+  --teal-dark: #004D61;
+  --teal-light: #E6F7FA;
+
+  --amber: #D98200;
+  --amber-dark: #8F5200;
+  --amber-light: #FFF8E6;
+
+  --black: #051D24;
+  --white: #FFFFFF;
+
+  --primary:  var(--teal);
+  --primary-dk:  var(--teal-dark);
+  --accent:  var(--pink);
   --accent-dk:  var(--pink-dark);
+  --dark: var(--black);
 
-  --dark:       var(--black);
-  --white:      #FFFFFF;
+  --bg: var(--teal-light);
+  --bg2: var(--pink-light);
 
-  --bg:         #F0FAFB;
-  --bg2:        #FDF5F9;
+  --gray: #B0CED6;
+  --gray-text: #004D61;
 
-  --gray:       #D6E4EA;
-  --gray-text:  #5F7C85;
+  --green: #28A745;
+  --green-dark: #1E7E34;
+  --green-light: #E8F8EC;
 
-  --green:      #58CC02;
-  --green-dark: #3E9800;
-  --red:        #FF4B4B;
-  --red-dark:   #CC2B2B;
+  --red: #DC3545;
+  --red-dark: #BD2130;
+  --red-light: #FDF0F2;
 
   --radius: 16px;
   --shadow: 0 4px 0;
