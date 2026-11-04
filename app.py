@@ -2,7 +2,7 @@ from flask import (Flask, render_template, jsonify, request,
                    session, redirect, url_for)
 from datetime import datetime, date, timedelta
 from functools import wraps
-import os, hashlib, secrets
+import os, hashlib, secrets, re
 
 import firebase_admin
 from firebase_admin import credentials, firestore as fb_firestore
