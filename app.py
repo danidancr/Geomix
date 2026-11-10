@@ -244,7 +244,61 @@ def build_progress_map(user_id):
     return result
 
 
-def build_stats(user_id):
+def build_unit_states(progress):
+    """Resumo por unidade: quantas atividades concluídas e se está liberada."""
+    states = {}
+    for u in range(1, 6):
+        done = sum(1 for a in range(1, 6) if progress[f"{u}.{a}"]['complete'])
+        states[u] = {
+            'done':     done,
+            'complete': done == 5,
+            'unlocked': progress[f"{u}.1"]['unlocked'],
+        }
+    return states
+
+
+def find_next_pending(progress):
+    """Primeira atividade liberada e ainda não concluída (unidade, atividade)."""
+    for u in range(1, 6):
+        for a in range(1, 6):
+            p = progress[f"{u}.{a}"]
+            if p['unlocked'] and not p['complete']:
+                return u, a
+    return None
+
+
+def build_achievements(total_answered, accuracy, xp, streak, acts_done, units_done):
+    """Conquistas calculadas a partir do progresso (sem novos campos no banco)."""
+    return [
+        {'id': 'first_step', 'icon': '👣', 'title': 'Primeiro passo',
+         'desc': 'Responda sua primeira questão.',
+         'earned': total_answered >= 1, 'progress': f'{min(total_answered, 1)}/1'},
+        {'id': 'first_activity', 'icon': '✅', 'title': 'Atividade concluída',
+         'desc': 'Conclua uma atividade completa.',
+         'earned': acts_done >= 1, 'progress': f'{min(acts_done, 1)}/1'},
+        {'id': 'five_activities', 'icon': '🧩', 'title': 'Em ritmo',
+         'desc': 'Conclua 5 atividades.',
+         'earned': acts_done >= 5, 'progress': f'{min(acts_done, 5)}/5'},
+        {'id': 'first_unit', 'icon': '🏁', 'title': 'Unidade completa',
+         'desc': 'Conclua todas as atividades de uma unidade.',
+         'earned': units_done >= 1, 'progress': f'{min(units_done, 1)}/1'},
+        {'id': 'streak3', 'icon': '🔥', 'title': 'Três dias seguidos',
+         'desc': 'Estude 3 dias seguidos.',
+         'earned': streak >= 3, 'progress': f'{min(streak, 3)}/3'},
+        {'id': 'xp200', 'icon': '⚡', 'title': '200 XP',
+         'desc': 'Acumule 200 pontos de experiência.',
+         'earned': xp >= 200, 'progress': f'{min(xp, 200)}/200'},
+        {'id': 'precision', 'icon': '🎯', 'title': 'Boa pontaria',
+         'desc': 'Tenha 80% de acertos com pelo menos 20 questões respondidas.',
+         'earned': total_answered >= 20 and accuracy >= 80,
+         'progress': f'{min(total_answered, 20)}/20 questões'},
+        {'id': 'all_units', 'icon': '🎓', 'title': 'Mestre da Geometria',
+         'desc': 'Conclua as 5 unidades.',
+         'earned': units_done >= 5, 'progress': f'{min(units_done, 5)}/5'},
+    ]
+
+
+def build_stats(user_id, xp=0, streak=0):
     from questions import UNITS_META
     all_rows   = _get_all_progress(user_id)
     total_ans  = len(all_rows)
@@ -259,10 +313,23 @@ def build_stats(user_id):
         corr_u = sum(1 for r in rows_u if r.get('correct'))
         total_possible = 25
         pct    = min(100, round(corr_u / total_possible * 100))
+        # Status simples para a tela de progresso (categorias em vez de números soltos)
+        unlocked = is_activity_unlocked(user_id, uid, 1, all_rows)
+        if acts_done == 5:
+            status, status_label = 'done', 'Concluída'
+        elif acts_done > 0 or len(rows_u) > 0:
+            status, status_label = 'doing', 'Em andamento'
+        elif unlocked:
+            status, status_label = 'next', 'Pronta para começar'
+        else:
+            status, status_label = 'locked', 'Bloqueada'
+        acc_u = round(corr_u / len(rows_u) * 100) if rows_u else None
         units_stats.append({
             'id': uid, 'title': umeta['title'],
             'color': umeta['color'], 'acts_done': acts_done,
             'answered': len(rows_u), 'correct': corr_u, 'pct': pct,
+            'acts_pct': round(acts_done / 5 * 100),
+            'status': status, 'status_label': status_label, 'accuracy': acc_u,
         })
 
     today         = date.today()
@@ -287,12 +354,31 @@ def build_stats(user_id):
             'is_today': d == today,
         })
 
+    acts_done_total = sum(u['acts_done'] for u in units_stats)
+    units_done      = sum(1 for u in units_stats if u['acts_done'] == 5)
+
+    # Sugestão de revisão: unidade iniciada com a menor taxa de acerto (< 70%)
+    review = None
+    started = [u for u in units_stats if u['answered'] >= 5 and u['accuracy'] is not None]
+    if started:
+        weakest = min(started, key=lambda u: u['accuracy'])
+        if weakest['accuracy'] < 70:
+            review = {'id': weakest['id'], 'title': weakest['title'],
+                      'accuracy': weakest['accuracy']}
+
     return {
         'total_answered': total_ans,
         'total_correct':  total_corr,
         'accuracy':       accuracy,
         'units':          units_stats,
         'week_data':      week_data,
+        'acts_done':      acts_done_total,
+        'acts_total':     25,
+        'overall_pct':    round(acts_done_total / 25 * 100),
+        'units_done':     units_done,
+        'review':         review,
+        'achievements':   build_achievements(total_ans, accuracy, xp, streak,
+                                             acts_done_total, units_done),
     }
 
 
@@ -427,7 +513,33 @@ def dashboard():
     user = current_user()
     from questions import UNITS_META
     progress = build_progress_map(user['id'])
-    return render_template('dashboard.html', user=user, units=UNITS_META, progress=progress)
+    states   = build_unit_states(progress)
+    pending  = find_next_pending(progress)
+
+    # P-06: uma unidade por tela. Por padrão abre a unidade em andamento (P-07).
+    default_unit = pending[0] if pending else 5
+    try:
+        selected = int(request.args.get('unit', default_unit))
+    except (TypeError, ValueError):
+        selected = default_unit
+    if selected not in UNITS_META or not states[selected]['unlocked']:
+        selected = default_unit
+
+    next_info = None
+    if pending:
+        pu, pa = pending
+        pp = progress[f"{pu}.{pa}"]
+        # Atividade já iniciada vai direto para a lição; a 1ª de cada unidade passa pela introdução.
+        href = (f"/intro/{pu}" if pa == 1 and pp['total'] == 0
+                else f"/lesson/{pu}/{pa}")
+        next_info = {'unit': pu, 'activity': pa, 'href': href,
+                     'title': UNITS_META[pu]['activities'][pa - 1]['title'],
+                     'started': pp['total'] > 0}
+
+    has_progress = any(p['total'] > 0 for p in progress.values())
+    return render_template('dashboard.html', user=user, units=UNITS_META,
+                           progress=progress, states=states, selected=selected,
+                           next_info=next_info, has_progress=has_progress)
 
 
 @app.route('/intro/<int:unit_id>')
@@ -467,7 +579,7 @@ def formulas():
 @login_required
 def profile():
     user  = current_user()
-    stats = build_stats(user['id'])
+    stats = build_stats(user['id'], user.get('xp', 0), user.get('streak', 0))
     return render_template('profile.html', user=user, stats=stats)
 
 
