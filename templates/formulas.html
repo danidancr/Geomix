@@ -14,22 +14,6 @@
         <p>Todas as fórmulas de área das figuras planas em um só lugar.</p>
       </div>
 
-      <div class="formula-quickref">
-        {% set figs = [
-          ('square','Quadrado','A = l²'),
-          ('rectangle','Retângulo','A = b × h'),
-          ('triangle','Triângulo','A = (b×h)/2'),
-          ('circle','Círculo','A = π×r²'),
-          ('rhombus','Losango','A = (D×d)/2'),
-          ('trapezoid','Trapézio','A = ((B+b)×h)/2'),
-          ('equilateral_triangle','Tri. Equilátero','A = (l²√3)/4'),
-          ('hexagon','Hexágono Reg.','A = (3√3×l²)/2'),
-        ] %}
-        {% for fig, name, formula in figs %}
-        <a class="qref-chip" href="#card-{{ fig }}">{{ name }}</a>
-        {% endfor %}
-      </div>
-
       <div class="formula-grid">
         <div class="formula-card" id="card-square">
           <div class="fc-fig" id="svg-square"></div>
