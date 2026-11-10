@@ -7,61 +7,126 @@
   {% include '_sidebar.html' %}
 
   <main class="main-content">
-    <div class="dashboard-header">
-      <h1>Geometria Plana</h1>
-      <p>Aprenda figuras, características e cálculos de área!</p>
+    <div class="dashboard-header dash-head-row">
+      <div>
+        <h1>Geometria Plana</h1>
+        <p>Aprenda figuras, características e cálculos de área!</p>
+      </div>
+      <button type="button" class="btn btn-secondary btn-sm" data-open-tutorial>Tutorial: como usar</button>
     </div>
 
-    <div class="trail-container">
+    {# P-07: leva direto à próxima atividade pendente #}
+    {% if next_info %}
+    <a class="continue-card" href="{{ next_info.href }}" id="continue-card">
+      <span class="continue-kicker">{{ 'Continuar de onde parou' if has_progress else 'Comece por aqui' }}</span>
+      <span class="continue-title">Unidade {{ next_info.unit }} · Atividade {{ next_info.activity }} — {{ next_info.title }}</span>
+      <span class="continue-go">{{ 'Continuar' if next_info.started else 'Começar' }} →</span>
+    </a>
+    {% else %}
+    <div class="continue-card continue-done">
+      <span class="continue-kicker">Parabéns!</span>
+      <span class="continue-title">Você concluiu todas as unidades. Revise quando quiser.</span>
+    </div>
+    {% endif %}
+
+    {# P-06: uma unidade por tela, escolhida pelos botões abaixo #}
+    <nav class="unit-tabs" aria-label="Unidades">
       {% for uid, unit in units.items() %}
-        {% set u = uid %}
-        <div class="unit-header" style="--unit-color: {{ unit.color }}">
-          <div>
-            <div class="unit-number">UNIDADE {{ u }}</div>
-            <div class="unit-title">{{ unit.title }}</div>
-            <div class="unit-sub">{{ unit.subtitle }}</div>
-          </div>
-          {% set u_done = namespace(v=0) %}
-          {% for a in range(1,6) %}
-            {% if progress[u|string + '.' + a|string].complete %}
-              {% set u_done.v = u_done.v + 1 %}
-            {% endif %}
-          {% endfor %}
-          <div class="unit-progress-badge">{{ u_done.v }}/5</div>
-        </div>
-
-        <div class="activity-row">
-          {% for aidx in range(1, 6) %}
-            {% set akey = u|string + '.' + aidx|string %}
-            {% set ap = progress[akey] %}
-            {% set act = unit.activities[aidx-1] %}
-            {% set col = (aidx - 1) % 5 %}
-            <div class="node-slot slot-{{ col }}">
-              {% if ap.complete %}
-                <a href="/lesson/{{ u }}/{{ aidx }}" class="node complete" title="{{ act.title }}">
-                  <span class="node-icon">✓</span>
-                </a>
-              {% elif ap.unlocked %}
-                <a href="{% if aidx == 1 %}/intro/{{ u }}{% else %}/lesson/{{ u }}/{{ aidx }}{% endif %}"
-                   class="node unlocked pulse" title="{{ act.title }}">
-                  <span class="node-icon">{{ act.icon }}</span>
-                </a>
-              {% else %}
-                <div class="node locked" title="Bloqueado">
-                  <span class="node-icon">𖥑</span>
-                </div>
-              {% endif %}
-              <div class="node-label">{{ act.title }}</div>
-            </div>
-          {% endfor %}
-        </div>
-
-        {% if not loop.last %}
-        <div class="unit-divider"></div>
+        {% set st = states[uid] %}
+        {% if st.unlocked %}
+          <a href="/dashboard?unit={{ uid }}"
+             class="unit-tab{% if uid == selected %} is-selected{% endif %}{% if st.complete %} is-complete{% endif %}"
+             {% if uid == selected %}aria-current="page"{% endif %}>
+            <span class="unit-tab-num">Unidade {{ uid }}</span>
+            <span class="unit-tab-state">{{ 'Concluída ✓' if st.complete else st.done ~ '/5' }}</span>
+          </a>
+        {% else %}
+          <span class="unit-tab is-locked" aria-disabled="true" title="Conclua a unidade anterior para liberar">
+            <span class="unit-tab-num">Unidade {{ uid }}</span>
+            <span class="unit-tab-state">Bloqueada</span>
+          </span>
         {% endif %}
       {% endfor %}
+    </nav>
+
+    {% set u = selected %}
+    {% set unit = units[u] %}
+    <div class="trail-container">
+      <div class="unit-header" style="--unit-color: {{ unit.color }}">
+        <div>
+          <div class="unit-number">UNIDADE {{ u }}</div>
+          <h2 class="unit-title">{{ unit.title }}</h2>
+          <div class="unit-sub">{{ unit.subtitle }}</div>
+        </div>
+        <div class="unit-progress-badge">{{ states[u].done }}/5</div>
+      </div>
+
+      <div class="activity-row">
+        {% for aidx in range(1, 6) %}
+          {% set akey = u|string + '.' + aidx|string %}
+          {% set ap = progress[akey] %}
+          {% set act = unit.activities[aidx-1] %}
+          {% set col = (aidx - 1) % 5 %}
+          {% set is_current = next_info and next_info.unit == u and next_info.activity == aidx %}
+          <div class="node-slot{% if ap.complete %} slot-done{% endif %}">
+            {% if ap.complete %}
+              <a href="/lesson/{{ u }}/{{ aidx }}" class="node complete" aria-label="{{ act.title }} — concluída">
+                <span class="node-icon" aria-hidden="true">✓</span>
+              </a>
+            {% elif ap.unlocked %}
+              <a href="{% if aidx == 1 and ap.total == 0 %}/intro/{{ u }}{% else %}/lesson/{{ u }}/{{ aidx }}{% endif %}"
+                 class="node unlocked pulse{% if is_current %} current-node{% endif %}"
+                 {% if is_current %}id="current-node"{% endif %}
+                 aria-label="{{ act.title }} — atividade atual">
+                <span class="node-icon" aria-hidden="true">{{ act.icon }}</span>
+              </a>
+            {% else %}
+              <div class="node locked" role="img" aria-label="{{ act.title }} — bloqueada">
+                <span class="node-icon" aria-hidden="true">𖥑</span>
+              </div>
+            {% endif %}
+            <div class="node-label">{{ act.title }}</div>
+          </div>
+        {% endfor %}
+      </div>
+
+      <div class="unit-pager">
+        {% if u > 1 %}
+          <a class="btn btn-secondary" href="/dashboard?unit={{ u - 1 }}">← Unidade {{ u - 1 }}</a>
+        {% else %}<span></span>{% endif %}
+        {% if u < 5 and states[u + 1].unlocked %}
+          <a class="btn btn-primary btn-3d" href="/dashboard?unit={{ u + 1 }}">Unidade {{ u + 1 }} →</a>
+        {% elif u < 5 %}
+          <span class="pager-hint">Conclua as 5 atividades para liberar a Unidade {{ u + 1 }}.</span>
+        {% endif %}
+      </div>
     </div>
   </main>
 </div>
+
+<script>
+(function () {
+  // P-07: rola até a atividade atual
+  var cur = document.getElementById('current-node');
+  var row = document.querySelector('.activity-row');
+  if (cur && row) {
+    // centraliza a atividade atual na linha horizontal e traz a linha para a vista
+    var go = function () {
+      var r = cur.getBoundingClientRect(), rr = row.getBoundingClientRect();
+      row.scrollTo({ left: row.scrollLeft + (r.left - rr.left) - (rr.width - r.width) / 2, behavior: 'smooth' });
+      row.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    };
+    setTimeout(go, 150);
+  }
+
+  // Tutorial: abre sozinho só na primeira visita sem progresso (e sempre pelo botão)
+  var KEY = 'geomix_guide_seen';
+  function seen() { try { return localStorage.getItem(KEY) === '1'; } catch (e) { return false; } }
+  function remember() { try { localStorage.setItem(KEY, '1'); } catch (e) {} }
+  {% if not has_progress %}
+  if (!seen()) { remember(); setTimeout(function () { window.openTutorial && window.openTutorial(); }, 300); }
+  {% endif %}
+})();
+</script>
 
 {% endblock %}

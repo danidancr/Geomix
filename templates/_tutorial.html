@@ -1,0 +1,58 @@
+{# Tutorial passo a passo — disponível a qualquer momento (menu, atividade e trilha) #}
+<div class="modal-overlay" id="tutorial-modal" style="display:none" role="dialog" aria-modal="true" aria-labelledby="tutorial-title">
+  <div class="modal-box tutorial-box">
+    <div class="tutorial-top">
+      <h2 id="tutorial-title">Como usar o Geomix</h2>
+      <button type="button" class="tutorial-x" id="tutorial-close" aria-label="Fechar tutorial">✕</button>
+    </div>
+
+    <div class="tutorial-steps">
+      <section class="tutorial-step" data-step="1">
+        <div class="tutorial-ico" aria-hidden="true">👋</div>
+        <h3>Bem-vindo(a)!</h3>
+        <p>O Geomix ensina geometria plana em <strong>5 unidades</strong>, cada uma com <strong>5 atividades</strong>. Você aprende as figuras, suas características, as fórmulas de área e depois pratica os cálculos.</p>
+      </section>
+      <section class="tutorial-step" data-step="2">
+        <div class="tutorial-ico" aria-hidden="true">🗺️</div>
+        <h3>A trilha</h3>
+        <p>As atividades ficam em uma linha. A tela acompanha a atividade da vez.</p>
+        <ul class="tutorial-legend">
+          <li><span class="lg lg-done">✓</span> Verde: atividade concluída</li>
+          <li><span class="lg lg-now">●</span> Azul com borda: a atividade atual</li>
+          <li><span class="lg lg-lock">🔒</span> Cinza: bloqueada até concluir a anterior</li>
+        </ul>
+        <p>Use <em>Continuar de onde parou</em> para ir direto à próxima atividade.</p>
+      </section>
+      <section class="tutorial-step" data-step="3">
+        <div class="tutorial-ico" aria-hidden="true">✍️</div>
+        <h3>Responder</h3>
+        <p>Escolha uma opção, digite a resposta, arraste os nomes ou ordene as etapas. Depois toque em <strong>Verificar</strong>.</p>
+        <p>Nos campos de digitar, use vírgula ou ponto nos decimais (ex.: 12,5).</p>
+      </section>
+      <section class="tutorial-step" data-step="4">
+        <div class="tutorial-ico" aria-hidden="true">💡</div>
+        <h3>Acertou ou errou?</h3>
+        <p>Você sempre vê a <strong>resposta correta</strong> e uma explicação. Questões erradas voltam no final da atividade para você tentar de novo.</p>
+        <p>Está em dúvida? Use o botão <strong>Dica</strong> nos exercícios de digitar.</p>
+      </section>
+      <section class="tutorial-step" data-step="5">
+        <div class="tutorial-ico" aria-hidden="true">🏆</div>
+        <h3>XP, sequência e conquistas</h3>
+        <p>Cada acerto dá <strong>XP</strong>. Estudar todos os dias aumenta sua <strong>sequência</strong>. Veja suas <strong>conquistas</strong> em <em>Meu Perfil</em> e compare seu XP no <em>Ranking</em>.</p>
+      </section>
+      <section class="tutorial-step" data-step="6">
+        <div class="tutorial-ico" aria-hidden="true">📐</div>
+        <h3>Precisa de uma fórmula?</h3>
+        <p>A aba <strong>Revisão</strong> reúne todas as fórmulas de área com exemplos.</p>
+        <p>Este tutorial fica sempre disponível no botão <strong>Tutorial</strong> do menu e no <strong>?</strong> dentro das atividades.</p>
+      </section>
+    </div>
+
+    <div class="tutorial-dots" id="tutorial-dots" aria-hidden="true"></div>
+    <div class="tutorial-nav">
+      <button type="button" class="btn btn-secondary" id="tutorial-prev">Voltar</button>
+      <span class="tutorial-count" id="tutorial-count" aria-live="polite"></span>
+      <button type="button" class="btn btn-primary btn-3d" id="tutorial-next">Próximo</button>
+    </div>
+  </div>
+</div>

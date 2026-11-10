@@ -15,6 +15,19 @@
 
 <body>
   {% block body %}{% endblock %}
+
+  <!-- Janela de confirmação reutilizável (P-13) -->
+  <div class="modal-overlay" id="confirm-modal" style="display:none" role="alertdialog" aria-modal="true"
+       aria-labelledby="confirm-title" aria-describedby="confirm-text">
+    <div class="modal-box">
+      <h2 id="confirm-title"></h2>
+      <p id="confirm-text" class="confirm-text"></p>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" id="confirm-cancel">Ficar aqui</button>
+        <button type="button" class="btn btn-primary btn-3d" id="confirm-ok">Sair</button>
+      </div>
+    </div>
+  </div>
   <script src="{{ url_for('static', filename='js/app.js') }}"></script>
   {% block scripts %}{% endblock %}
 </body>

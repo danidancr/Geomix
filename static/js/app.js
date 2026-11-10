@@ -75,11 +75,12 @@ function drawFigureSVG(type, w = 120, h = 120) {
       break;
     }
     case 'triangle': {
-      // Diferenciado do equilátero por ser mais baixo e largo
-      const triH = H * 0.7; 
+      // P-10: triângulo qualquer (lados diferentes), com o vértice superior
+      // deslocado — assim não é confundido com o equilátero, que tem marcas.
+      const triH = H * 0.72;
       const yBase = cy + triH/2;
       const yTopo = cy - triH/2;
-      poly([[cx, yTopo], [cx + W/2, yBase], [cx - W/2, yBase]]);
+      poly([[cx - W*0.18, yTopo], [cx + W/2, yBase], [cx - W/2, yBase]]);
       break;
     }
     case 'equilateral_triangle': {
@@ -89,6 +90,21 @@ function drawFigureSVG(type, w = 120, h = 120) {
         return [cx + R*Math.cos(a), cy + R*Math.sin(a)];
       });
       poly(pts);
+      // P-10: um traço em cada lado indica "lados iguais"
+      for (let i = 0; i < 3; i++) {
+        const p1 = pts[i], p2 = pts[(i + 1) % 3];
+        const mx = (p1[0] + p2[0]) / 2, my = (p1[1] + p2[1]) / 2;
+        const dx = p2[0] - p1[0], dy = p2[1] - p1[1];
+        const len = Math.hypot(dx, dy) || 1;
+        const nx = -dy / len * 6, ny = dx / len * 6;
+        const tick = document.createElementNS(ns, 'line');
+        tick.setAttribute('x1', mx - nx); tick.setAttribute('y1', my - ny);
+        tick.setAttribute('x2', mx + nx); tick.setAttribute('y2', my + ny);
+        tick.setAttribute('stroke', '#FFFFFF');
+        tick.setAttribute('stroke-width', '3');
+        tick.setAttribute('stroke-linecap', 'round');
+        svg.appendChild(tick);
+      }
       break;
     }
     case 'trapezoid': {
@@ -302,7 +318,7 @@ if (typeof LESSON_CONFIG !== 'undefined') {
     }
 
     // Question text
-    const qText = document.createElement('div');
+    const qText = document.createElement('h2');
     qText.className = 'question-text';
     qText.textContent = q.question;
     card.appendChild(qText);
@@ -413,8 +429,19 @@ if (typeof LESSON_CONFIG !== 'undefined') {
     const area = document.createElement('div');
     area.className = 'fill-area';
 
+    // P-04: campo com rótulo visível e associado (acessível a leitores de tela)
+    const inputId = 'answer-input';
+    const label = document.createElement('label');
+    label.className = 'field-label';
+    label.htmlFor = inputId;
+    label.textContent = 'Sua resposta';
+    area.appendChild(label);
+
     const input = document.createElement('input');
     input.type = 'text';
+    input.id = inputId;
+    input.name = 'answer';
+    input.autocomplete = 'off';
     input.className = 'text-input';
     input.placeholder = 'Digite sua resposta...';
     input.addEventListener('input', () => { btnCheck.disabled = input.value.trim() === ''; });
@@ -425,6 +452,7 @@ if (typeof LESSON_CONFIG !== 'undefined') {
     if (q.hint) {
       const hintBtn = document.createElement('button');
       hintBtn.className = 'hint-btn';
+      hintBtn.type = 'button';
       hintBtn.textContent = '💡 Dica';
       const hintBox = document.createElement('div');
       hintBox.className = 'hint-box';
@@ -452,12 +480,7 @@ if (typeof LESSON_CONFIG !== 'undefined') {
       }
       input.disabled = true;
       input.classList.add(correct ? 'correct' : 'wrong');
-      if (!correct) {
-        const corrHint = document.createElement('div');
-        corrHint.className = 'hint-box';
-        corrHint.textContent = `✓ Resposta correta: ${q.answer}`;
-        area.appendChild(corrHint);
-      }
+      // O gabarito aparece no painel de feedback (P-05).
       showFeedback(correct, q);
       submitAnswer(q, correct);
     }
@@ -659,7 +682,15 @@ if (typeof LESSON_CONFIG !== 'undefined') {
         placed.toLowerCase() === tgt.correct.toLowerCase() ||
         tgt.correct.toLowerCase().startsWith(placed.toLowerCase().slice(0,5));
       row?.classList.add(isCorrect ? 'correct' : 'wrong');
-      if (!isCorrect) allCorrect = false;
+      if (!isCorrect) {
+        allCorrect = false;
+        if (row && !row.querySelector('.correct-reveal')) {
+          const rev = document.createElement('div');
+          rev.className = 'correct-reveal';
+          rev.textContent = '✓ Correto: ' + tgt.correct;
+          row.appendChild(rev);
+        }
+      }
     });
     showFeedback(allCorrect, q);
     submitAnswer(q, allCorrect);
@@ -844,6 +875,30 @@ if (typeof LESSON_CONFIG !== 'undefined') {
   let lastXpAwarded = 0;
   let lastIsRevision = false;
 
+  // P-05: texto com o gabarito de cada tipo de exercício
+  function correctAnswerText(q) {
+    switch (q.type) {
+      case 'multiple_choice':
+        return q.options && q.options[q.correct] !== undefined ? String(q.options[q.correct]) : '';
+      case 'multiple_choice_figure': {
+        const f = q.options && q.options[q.correct];
+        return FIGURE_NAMES[f] || f || '';
+      }
+      case 'fill_blank':
+        return String(q.answer).replace('.', ',');
+      case 'drag_drop':
+        return (q.targets || []).map(t => {
+          let who = t.figure ? (FIGURE_NAMES[t.figure] || t.figure) : (t.text || '');
+          if (who.length > 34) who = who.slice(0, 32).trim() + '…';
+          return who + ' → ' + t.correct;
+        }).join(' · ');
+      case 'order_steps':
+        return (q.correct_order || []).map((oi, i) => (i + 1) + ') ' + q.steps[oi]).join('  ');
+      default:
+        return '';
+    }
+  }
+
   function showFeedback(correct, q) {
     clearTimer();
     lastWasCorrect = correct;
@@ -879,6 +934,16 @@ if (typeof LESSON_CONFIG !== 'undefined') {
     document.getElementById('fb-title').innerHTML =
       (correct ? 'Correto!' : 'Ops! Não foi dessa vez.') + (correct && lastIsRevision ? revBadge : '') + streakBadge;
     document.getElementById('fb-exp').textContent = q.explanation || '';
+    const fbAnswer = document.getElementById('fb-answer');
+    const ansText = !correct ? correctAnswerText(q) : '';
+    if (fbAnswer) {
+      fbAnswer.style.display = ansText ? 'block' : 'none';
+      fbAnswer.textContent = ansText ? 'Resposta correta: ' + ansText : '';
+    }
+    // P-08: o botão Continuar fica no mesmo lugar do Verificar e recebe o foco
+    // (Enter continua o fluxo sem precisar mover o mouse).
+    const btnContinue = document.getElementById('btn-continue');
+    if (btnContinue) setTimeout(() => btnContinue.focus({ preventScroll: true }), 50);
 
     if (correct) {
       const awarded = lastXpAwarded || (q.xp || 10);
@@ -942,6 +1007,7 @@ if (typeof LESSON_CONFIG !== 'undefined') {
   }
 
   async function submitAnswer(q, correct) {
+    window.GEOMIX_LESSON_DIRTY = true;
     try {
       const res  = await fetch('/api/submit', {
         method: 'POST',
@@ -967,6 +1033,7 @@ if (typeof LESSON_CONFIG !== 'undefined') {
   function startTimer(seconds) {
     let remaining = seconds;
     timerInterval = setInterval(() => {
+      if (window.GEOMIX_PAUSED) return;   // tutorial aberto: tempo pausado
       remaining--;
       const fill = document.getElementById('timer-fill');
       const label = document.getElementById('timer-label');
@@ -1012,7 +1079,7 @@ document.addEventListener('DOMContentLoaded', function() {
         };
 
         // Fechar ao clicar nos links
-        const links = document.querySelectorAll('.nav-item');
+        const links = document.querySelectorAll('a.nav-item');
         links.forEach(link => {
             link.onclick = function() {
                 side.classList.remove('active');
@@ -1022,3 +1089,125 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+// ── P-13: janela de confirmação antes de sair ──
+(function () {
+  const modal = document.getElementById('confirm-modal');
+  if (!modal) return;
+  const titleEl = document.getElementById('confirm-title');
+  const textEl  = document.getElementById('confirm-text');
+  const okBtn   = document.getElementById('confirm-ok');
+  const cancel  = document.getElementById('confirm-cancel');
+  let onOk = null, lastFocus = null;
+
+  function close() {
+    modal.style.display = 'none';
+    onOk = null;
+    if (lastFocus && lastFocus.focus) lastFocus.focus();
+  }
+  window.geomixConfirm = function (opts) {
+    lastFocus = document.activeElement;
+    titleEl.textContent = opts.title || 'Tem certeza?';
+    textEl.textContent  = opts.text  || '';
+    okBtn.textContent   = opts.ok    || 'Sair';
+    cancel.textContent  = opts.cancel || 'Ficar aqui';
+    onOk = opts.onConfirm || null;
+    modal.style.display = 'flex';
+    cancel.focus();            // foco no botão seguro, para um Enter acidental não sair
+  };
+  okBtn.addEventListener('click', () => { const fn = onOk; modal.style.display = 'none'; if (fn) fn(); });
+  cancel.addEventListener('click', close);
+  modal.addEventListener('click', e => { if (e.target === modal) close(); });
+  document.addEventListener('keydown', e => {
+    if (modal.style.display === 'none') return;
+    if (e.key === 'Escape') close();
+    if (e.key === 'Tab') {      // mantém o foco dentro da janela
+      const f = [cancel, okBtn];
+      const i = f.indexOf(document.activeElement);
+      e.preventDefault();
+      f[(i + (e.shiftKey ? f.length - 1 : 1)) % f.length].focus();
+    }
+  });
+
+  // Links com data-confirm-* (ex.: "Sair" do menu)
+  document.addEventListener('click', e => {
+    const a = e.target.closest('a[data-confirm-title]');
+    if (!a) return;
+    e.preventDefault();
+    window.geomixConfirm({
+      title: a.dataset.confirmTitle, text: a.dataset.confirmText, ok: a.dataset.confirmOk,
+      onConfirm: () => { window.location.href = a.href; },
+    });
+  });
+
+  // Botão ✕ da atividade: só pergunta se já houve resposta (há o que perder)
+  const exit = document.getElementById('btn-exit');
+  if (exit) {
+    exit.addEventListener('click', () => {
+      const go = () => { window.location.href = exit.dataset.href || '/dashboard'; };
+      const done = document.getElementById('completion-screen');
+      if (!window.GEOMIX_LESSON_DIRTY || (done && done.style.display !== 'none')) { go(); return; }
+      window.geomixConfirm({
+        title: 'Sair da atividade?',
+        text: 'Se sair agora, você perde o andamento desta atividade e terá que recomeçar.',
+        ok: 'Sair mesmo assim', cancel: 'Continuar atividade',
+        onConfirm: go,
+      });
+    });
+  }
+})();
+
+
+// ── Tutorial disponível a qualquer momento ──
+(function () {
+  const modal = document.getElementById('tutorial-modal');
+  if (!modal) return;
+  const steps = Array.from(modal.querySelectorAll('.tutorial-step'));
+  const prev = document.getElementById('tutorial-prev');
+  const next = document.getElementById('tutorial-next');
+  const count = document.getElementById('tutorial-count');
+  const dots = document.getElementById('tutorial-dots');
+  let idx = 0, lastFocus = null;
+
+  steps.forEach((_, i) => { const d = document.createElement('span'); d.className = 'tdot'; dots.appendChild(d); });
+
+  function show(i) {
+    idx = Math.max(0, Math.min(steps.length - 1, i));
+    steps.forEach((s, k) => { s.style.display = k === idx ? 'block' : 'none'; });
+    dots.querySelectorAll('.tdot').forEach((d, k) => d.classList.toggle('on', k === idx));
+    prev.style.visibility = idx === 0 ? 'hidden' : 'visible';
+    next.textContent = idx === steps.length - 1 ? 'Concluir' : 'Próximo';
+    count.textContent = (idx + 1) + ' de ' + steps.length;
+  }
+  function open() {
+    lastFocus = document.activeElement;
+    window.GEOMIX_PAUSED = true;
+    show(0);
+    modal.style.display = 'flex';
+    next.focus();
+  }
+  function close() {
+    modal.style.display = 'none';
+    window.GEOMIX_PAUSED = false;
+    if (lastFocus && lastFocus.focus) lastFocus.focus();
+  }
+  window.openTutorial = open;
+
+  prev.addEventListener('click', () => show(idx - 1));
+  next.addEventListener('click', () => { if (idx === steps.length - 1) close(); else show(idx + 1); });
+  document.getElementById('tutorial-close').addEventListener('click', close);
+  modal.addEventListener('click', e => { if (e.target === modal) close(); });
+  document.addEventListener('keydown', e => {
+    if (modal.style.display === 'none') return;
+    if (e.key === 'Escape') close();
+    if (e.key === 'ArrowRight' && idx < steps.length - 1) show(idx + 1);
+    if (e.key === 'ArrowLeft') show(idx - 1);
+  });
+  document.querySelectorAll('[data-open-tutorial]').forEach(b => b.addEventListener('click', () => {
+    const side = document.querySelector('.sidebar'), ov = document.getElementById('sidebarOverlay'), tg = document.getElementById('menuToggle');
+    if (side && side.classList.contains('active')) {   // celular: fecha o menu antes de abrir o tutorial
+      side.classList.remove('active'); if (ov) ov.style.display = 'none'; if (tg) tg.style.display = 'flex';
+    }
+    open();
+  }));
+})();

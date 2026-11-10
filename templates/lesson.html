@@ -5,7 +5,9 @@
 
   <!-- Top bar -->
   <header class="lesson-header">
-    <a href="/" class="btn-close" title="Sair">✕</a>
+    <h1 class="sr-only">{{ activity.title }} — Unidade {{ unit_id }}, atividade {{ activity_id }}</h1>
+    <button type="button" class="btn-close" id="btn-exit" aria-label="Sair da atividade"
+            data-href="/dashboard">✕</button>
     <div class="progress-bar-wrap">
       <div class="progress-bar-track">
         <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
@@ -13,6 +15,7 @@
     </div>
     
     <div class="header-chips">
+      <button type="button" class="help-btn" data-open-tutorial aria-label="Abrir tutorial" title="Tutorial">?</button>
       <div class="xp-chip" id="xp-chip">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="white" style="vertical-align: middle; margin-right:4px;">
           <path d="M11 21h-1l1-7H7l6-11h1l-1 7h4z"/>
@@ -37,8 +40,9 @@
   <!-- Feedback banner -->
   <div class="feedback-banner" id="feedback-banner" style="display:none">
     <div class="feedback-inner">
-      <div class="feedback-text">
+      <div class="feedback-text" role="status" aria-live="polite">
         <div class="feedback-title" id="fb-title"></div>
+        <div class="feedback-answer" id="fb-answer" style="display:none"></div>
         <div class="feedback-explanation" id="fb-exp"></div>
       </div>
     </div>
@@ -47,6 +51,8 @@
     </button>
   </div>
 </div>
+
+{% include '_tutorial.html' %}
 
 <!-- Completion screen (hidden) -->
 <div class="completion-screen" id="completion-screen" style="display:none">
@@ -68,7 +74,7 @@
       </div>
     </div>
     <div class="completion-actions">
-      <a href="/" class="btn btn-secondary">Início</a>
+      <a href="/dashboard?unit={{ unit_id }}" class="btn btn-secondary">Voltar à trilha</a>
       {% if activity_id < 5 %}
       <a href="/lesson/{{ unit_id }}/{{ activity_id + 1 }}" class="btn btn-primary btn-3d">
         Próxima Atividade
@@ -77,8 +83,6 @@
       <a href="/intro/{{ unit_id + 1 }}" class="btn btn-primary btn-3d">
         Próxima Unidade
       </a>
-      {% else %}
-      <a href="/" class="btn btn-primary btn-3d">🎓 Concluído!</a>
       {% endif %}
     </div>
   </div>

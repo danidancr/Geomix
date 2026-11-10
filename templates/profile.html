@@ -33,68 +33,93 @@
         <button class="btn btn-primary" onclick="openEditModal()">Editar dados</button>
       </div>
 
-      <div class="stats-overview">
-        <div class="stat-card">
-          <div class="sc-val">{{ stats.total_answered }}</div>
-          <div class="sc-label">Questões Respondidas</div>
+      <section class="stats-overview" aria-label="Resumo">
+        <div class="stat-card stat-wide">
+          <div class="sc-label">Progresso geral</div>
+          <div class="sc-val">{{ stats.acts_done }}<span class="sc-of"> de {{ stats.acts_total }} atividades</span></div>
+          <div class="meter" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ stats.overall_pct }}" aria-label="Progresso geral">
+            <div class="meter-fill" style="width:{{ stats.overall_pct }}%"></div>
+          </div>
+          <div class="sc-note">{{ stats.units_done }} de 5 unidades concluídas</div>
         </div>
         <div class="stat-card">
-          <div class="sc-val">{{ stats.total_correct }}</div>
-          <div class="sc-label">Respostas Corretas</div>
-        </div>
-        <div class="stat-card">
+          <div class="sc-label">Acertos</div>
           <div class="sc-val">{{ stats.accuracy }}%</div>
-          <div class="sc-label">Precisão Geral</div>
+          <div class="sc-note">{{ stats.total_correct }} de {{ stats.total_answered }} questões</div>
         </div>
         <div class="stat-card">
-          <div class="sc-val">{{ user.streak }}</div>
-          <div class="sc-label">Dias Seguidos</div>
+          <div class="sc-label">Sequência</div>
+          <div class="sc-val">{{ user.streak }}<span class="sc-of"> {{ 'dia' if user.streak == 1 else 'dias' }}</span></div>
+          <div class="sc-note">estudando seguido</div>
         </div>
-      </div>
+      </section>
 
-      <div class="profile-section-1">
-        <h2 class="section-h-1">Atividades</h2>
+      {% if stats.review %}
+      <a class="review-tip" href="/formulas">
+        <strong>Dica de revisão:</strong> na Unidade {{ stats.review.id }} você acertou {{ stats.review.accuracy }}% das questões.
+        Que tal rever as fórmulas? <span class="review-go">Abrir Revisão →</span>
+      </a>
+      {% endif %}
+
+      <section class="profile-section-2" aria-labelledby="h-units">
+        <h2 class="section-h-2" id="h-units">Sua trilha</h2>
+        <ul class="unit-cards">
+          {% for u in stats.units %}
+          <li class="unit-card status-{{ u.status }}">
+            <div class="uc-top">
+              <span class="uc-name">Unidade {{ u.id }}</span>
+              <span class="uc-status">
+                {% if u.status == 'done' %}✓{% elif u.status == 'doing' %}●{% elif u.status == 'next' %}▶{% else %}🔒{% endif %}
+                {{ u.status_label }}
+              </span>
+            </div>
+            <div class="uc-title">{{ u.title }}</div>
+            <div class="meter" role="progressbar" aria-valuemin="0" aria-valuemax="5" aria-valuenow="{{ u.acts_done }}" aria-label="Atividades concluídas na unidade {{ u.id }}">
+              <div class="meter-fill" style="width:{{ u.acts_pct }}%"></div>
+            </div>
+            <div class="uc-meta">
+              <span>{{ u.acts_done }} de 5 atividades</span>
+              {% if u.accuracy is not none %}
+                <span class="acc acc-{{ 'high' if u.accuracy >= 80 else ('mid' if u.accuracy >= 60 else 'low') }}">
+                  Acertos: {{ u.accuracy }}% · {{ 'Ótimo' if u.accuracy >= 80 else ('Bom' if u.accuracy >= 60 else 'Revisar') }}
+                </span>
+              {% endif %}
+            </div>
+          </li>
+          {% endfor %}
+        </ul>
+      </section>
+
+      <section class="profile-section-1" aria-labelledby="h-week">
+        <h2 class="section-h-1" id="h-week">Esta semana</h2>
         <div class="week-grid">
           {% for day in stats.week_data %}
           <div class="week-day{% if day.active %} active{% endif %}{% if day.is_today %} today{% endif %}">
-            <div class="week-dot{% if day.active %} filled{% endif %}{% if day.is_today %} today-ring{% endif %}">
-            </div>
-            <div class="week-label">
-              {{ day.label }}
-              {% if day.is_today %}<span class="today-tag"></span>{% endif %}
-            </div>
+            <div class="week-dot{% if day.active %} filled{% endif %}{% if day.is_today %} today-ring{% endif %}">{% if day.active %}✓{% endif %}</div>
+            <div class="week-label">{{ day.label }}{% if day.is_today %} <span class="sr-only">(hoje)</span>{% endif %}</div>
           </div>
           {% endfor %}
         </div>
-      </div>
+      </section>
 
-      <div class="profile-section-2">
-        <h2 class="section-h-2">Progresso por Unidade</h2>
-        <div class="unit-progress-list">
-          {% for u in stats.units %}
-          <div class="uprog-item">
-             <div class="uprog-body">
-              <div class="uprog-header">
-                <span class="uprog-title">Unidade {{ u.id }} — {{ u.title }}</span>
-                <span class="uprog-count">{{ u.acts_done }}/5 atividades</span>
-              </div>
-              <div class="uprog-bar-track">
-                <div class="uprog-bar-fill" style="width:{{ u.pct }}%"></div>
-              </div>
-              <div class="uprog-detail">
-                {% if u.answered > 0 %}
-                  {{ u.answered }} questões respondidas —
-                  {{ u.correct }} corretas
-                  ({{ (u.correct / u.answered * 100) | round | int }}%)
-                {% else %}
-                  Ainda não iniciada
-                {% endif %}
-              </div>
-            </div>
-          </div>
+      {# P-15: conquistas (avatar e modo noturno ficam para avaliação de custo e retorno) #}
+      <section class="profile-section-2" aria-labelledby="h-ach">
+        <h2 class="section-h-2" id="h-ach">Conquistas
+          <span class="ach-count">{{ stats.achievements | selectattr('earned') | list | length }} de {{ stats.achievements | length }}</span>
+        </h2>
+        <ul class="ach-grid">
+          {% for a in stats.achievements %}
+          <li class="ach{% if a.earned %} earned{% endif %}">
+            <span class="ach-icon" aria-hidden="true">{{ a.icon if a.earned else '🔒' }}</span>
+            <span class="ach-body">
+              <span class="ach-title">{{ a.title }}</span>
+              <span class="ach-desc">{{ a.desc }}</span>
+              <span class="ach-prog">{{ 'Conquistada ✓' if a.earned else a.progress }}</span>
+            </span>
+          </li>
           {% endfor %}
-        </div>
-      </div>
+        </ul>
+      </section>
 
     </div>
   </main>
@@ -115,14 +140,14 @@
     <!-- Tab: info -->
     <div id="tab-info" class="tab-content">
       <div class="form-group">
-        <label>Nome completo</label>
+        <label for="edit-name">Nome completo</label>
         <div class="input-wrap">
           <input type="text" id="edit-name" class="text-input"
-                 value="{{ user.name }}" maxlength="80"/>
+                 value="{{ user.name }}" maxlength="20"/>
         </div>
       </div>
       <div class="form-group">
-        <label>E-mail</label>
+        <label for="edit-email">E-mail</label>
         <div class="input-wrap">
           <input type="email" id="edit-email" class="text-input"
                  value="{{ user.email }}"/>
@@ -134,14 +159,14 @@
     <!-- Tab: password -->
     <div id="tab-pw" class="tab-content" style="display:none">
       <div class="form-group">
-        <label>Senha atual</label>
+        <label for="edit-curpw">Senha atual</label>
         <div class="input-wrap">
           <input type="password" id="edit-curpw" class="text-input" placeholder="Senha atual"/>
           <button type="button" class="toggle-pw" onclick="togglePw('edit-curpw')"style="font-size: 25px;">👁</button>
         </div>
       </div>
       <div class="form-group">
-        <label>Nova senha</label>
+        <label for="edit-newpw">Nova senha</label>
         <div class="input-wrap">
           <input type="password" id="edit-newpw" class="text-input" placeholder="Mínimo 6 caracteres"/>
           <button type="button" class="toggle-pw" onclick="togglePw('edit-newpw')"style="font-size: 25px;">👁</button>

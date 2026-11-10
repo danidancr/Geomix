@@ -12,8 +12,8 @@
 
 <aside class="sidebar">
   <!-- Logo do App -->
-  <a href="/dashboard" class="sidebar-logo">
-    <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo Geomix" class="logo-icon">
+  <a href="/dashboard" class="sidebar-logo" aria-hidden="true" tabindex="-1">
+    <img src="{{ url_for('static', filename='logo.png') }}" alt="" class="logo-icon">
     <span class="logo-text">Geomix</span>
   </a>
 
@@ -31,6 +31,9 @@
     <a href="/ranking" class="nav-item {% if active_page == 'ranking' %}active{% endif %}">
       Ranking
     </a>
+    <button type="button" class="nav-item nav-tutorial" data-open-tutorial>
+      <span aria-hidden="true">?</span> Tutorial
+    </button>
   </nav>
 
   <!-- Bloco de Status do Usuário -->
@@ -58,8 +61,9 @@
 
   <!-- Link de Logout no Rodapé -->
   <div class="sidebar-bottom">
-    <a href="/logout" class="nav-item nav-logout">
+    <a href="/logout" class="nav-item nav-logout" data-confirm-title="Sair do Geomix?" data-confirm-text="Você precisará entrar de novo para continuar. Seu progresso fica salvo." data-confirm-ok="Sair">
       Sair
     </a>
   </div>
 </aside>
+{% include '_tutorial.html' %}
