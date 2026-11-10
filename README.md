@@ -38,27 +38,3 @@ Total: 125 questões
 | P-14 | Guia "Como usar" curto e opcional |
 | P-15 | Conquistas no perfil (calculadas do progresso; sem novos campos) |
 | P-18 | H1 nas telas de exercício; links redundantes removidos |
-
-## Como publicar (GitHub + Render + Firebase)
-
-O Geomix é um app Flask (Python) que usa o **Firestore** como banco. O Firebase Hosting não roda Flask,
-então o app é hospedado no **Render** (já configurado em `render.yaml`) e conversa com o Firestore.
-
-### 1. GitHub
-1. Crie um repositório e envie o conteúdo desta pasta (a raiz do repositório deve ter `app.py`, `render.yaml`, etc.).
-2. Confira que `serviceAccountKey.json` **não** foi enviado (o `.gitignore` já bloqueia).
-
-### 2. Firebase (Firestore)
-1. No console do Firebase, abra o projeto → *Build → Firestore Database* e crie o banco, se ainda não existir.
-2. *Configurações do projeto → Contas de serviço → Gerar nova chave privada* (baixa um `.json`).
-3. (Opcional) publique as regras de bloqueio: `firebase deploy --only firestore:rules`.
-   Coleções usadas: `users` e `progress` (criadas automaticamente).
-
-### 3. Render
-1. *New → Blueprint* (ou Web Service) apontando para o repositório do GitHub.
-2. Em *Environment*, defina `FIREBASE_CREDENTIALS` com **todo o conteúdo** do `.json` da etapa 2.
-   `SECRET_KEY` é gerada automaticamente.
-3. Após o deploy, abra a URL do Render e teste.
-
-### Rodar na sua máquina
-`pip install -r requirements.txt`, salve a chave como `serviceAccountKey.json` na raiz e rode `python app.py`.
