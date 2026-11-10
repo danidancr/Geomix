@@ -1,5 +1,4 @@
 :root {
-  /* Paleta "clean": neutros frios + azul-petróleo como cor principal */
   --pink: #C2255C;
   --pink-dark: #9F1D4B;
   --pink-light: #FDF2F6;
@@ -673,7 +672,7 @@ a { text-decoration: none; color: inherit; }
 
 .profile-page { display: flex; flex-direction: column; gap: 24px; }
 .profile-header-card { display: flex; align-items: center; gap: 18px; background: var(--amber-dark); border-radius: 20px; padding: 26px 30px; }
-.profile-avatar-lg { width: 68px; height: 68px; border-radius: 50%; background: var(--primary); border: 3px solid rgba(255,255,255,.4); color: var(--white); font-size: 1.8rem; font-weight: 900; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.profile-avatar-lg { width: 68px; height: 68px; border-radius: 50%; background: var(--amber); border: 3px solid rgba(255,255,255,.4); color: var(--white); font-size: 1.8rem; font-weight: 900; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .profile-header-info { flex: 1; }
 .profile-header-info h1 { font-size: 1.45rem; font-weight: 900; color: var(--white); }
 .profile-header-info p  { font-size: 1rem; font-weight: 600; color: var(--white); margin-top: 2px; }
